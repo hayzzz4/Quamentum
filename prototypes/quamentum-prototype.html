@@ -1,0 +1,974 @@
+<title>Quamentum — Prototype</title>
+<style>
+  :root {
+    --bg: #F1F3F2;
+    --surface: #FFFFFF;
+    --surface-2: #E9ECEA;
+    --border: #D3D9D6;
+    --text: #161B19;
+    --text-muted: #57625E;
+    --accent: #0E7C78;
+    --accent-tint: #E4F1F0;
+    --accent-2: #6B5CA5;
+    --accent-2-tint: #EEEBF7;
+    --good: #2F7D4F;
+    --good-tint: #E5F2E9;
+    --warn: #A66A1E;
+    --warn-tint: #FBEEDD;
+    --crit: #B14638;
+    --crit-tint: #FBEAE7;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 8px 24px rgba(20, 30, 28, 0.08);
+    --display: "Bahnschrift", "Arial Narrow", "Segoe UI Semibold", sans-serif;
+    --body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+    --mono: "Cascadia Code", "SF Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161A;
+      --surface: #1A2025;
+      --surface-2: #212830;
+      --border: #2C363C;
+      --text: #E9EDEE;
+      --text-muted: #9BA8AC;
+      --accent: #4FD8D2;
+      --accent-tint: rgba(79, 216, 210, 0.12);
+      --accent-2: #ACA0E6;
+      --accent-2-tint: rgba(172, 160, 230, 0.14);
+      --good: #6BC98D;
+      --good-tint: rgba(107, 201, 141, 0.14);
+      --warn: #E3AE5E;
+      --warn-tint: rgba(227, 174, 94, 0.14);
+      --crit: #E38574;
+      --crit-tint: rgba(227, 133, 116, 0.14);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161A; --surface: #1A2025; --surface-2: #212830; --border: #2C363C;
+    --text: #E9EDEE; --text-muted: #9BA8AC;
+    --accent: #4FD8D2; --accent-tint: rgba(79, 216, 210, 0.12);
+    --accent-2: #ACA0E6; --accent-2-tint: rgba(172, 160, 230, 0.14);
+    --good: #6BC98D; --good-tint: rgba(107, 201, 141, 0.14);
+    --warn: #E3AE5E; --warn-tint: rgba(227, 174, 94, 0.14);
+    --crit: #E38574; --crit-tint: rgba(227, 133, 116, 0.14);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F3F2; --surface: #FFFFFF; --surface-2: #E9ECEA; --border: #D3D9D6;
+    --text: #161B19; --text-muted: #57625E;
+    --accent: #0E7C78; --accent-tint: #E4F1F0;
+    --accent-2: #6B5CA5; --accent-2-tint: #EEEBF7;
+    --good: #2F7D4F; --good-tint: #E5F2E9;
+    --warn: #A66A1E; --warn-tint: #FBEEDD;
+    --crit: #B14638; --crit-tint: #FBEAE7;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 8px 24px rgba(20, 30, 28, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-tint); }
+  button { font-family: inherit; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap;
+  }
+
+  /* ---------- Sign-in screen ---------- */
+  #screen-signin {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, var(--accent-tint), transparent 60%),
+      radial-gradient(900px 500px at 110% 110%, var(--accent-2-tint), transparent 60%),
+      var(--bg);
+  }
+  .signin-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 40px 36px 32px;
+    text-align: center;
+  }
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .brand-mark canvas { display: block; }
+  .brand-name {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .signin-card h1 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    text-wrap: balance;
+    margin: 0 0 8px;
+  }
+  .signin-card p.lede {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    max-width: 32ch;
+    margin: 0 auto 28px;
+  }
+  .btn {
+    font-family: var(--body);
+    font-size: 14.5px;
+    font-weight: 600;
+    border-radius: 3px;
+    padding: 11px 18px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 80ms ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { filter: brightness(0.94); }
+  :root[data-theme="dark"] .btn-primary, @media (prefers-color-scheme: dark) { }
+  .btn-primary { color: #06201F; }
+  .btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--text-muted); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-block { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-small { padding: 7px 12px; font-size: 13px; }
+
+  .signin-strava {
+    background: #1A2025;
+    color: #F1F3F2;
+  }
+  .signin-strava:hover { filter: brightness(1.15); }
+  .signin-fineprint {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ---------- App shell ---------- */
+  .app-shell { display: none; min-height: 100vh; }
+  .app-shell.active { display: grid; grid-template-columns: 216px 1fr; }
+
+  .rail {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .rail .brand-mark { justify-content: flex-start; margin-bottom: 4px; }
+  .rail .brand-name { font-size: 17px; }
+  .nav-group { display: flex; flex-direction: column; gap: 2px; }
+  .nav-eyebrow {
+    font-family: var(--body);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 10px;
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+  }
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item[aria-current="page"] {
+    background: var(--accent-tint);
+    color: var(--text);
+    font-weight: 600;
+  }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.55; flex: none; }
+  .nav-item[aria-current="page"] .nav-dot { background: var(--accent); opacity: 1; }
+
+  .rail-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .rail-footer strong { color: var(--text); display: block; font-size: 13.5px; margin-bottom: 2px; }
+
+  .main {
+    padding: 28px 36px 60px;
+    max-width: 900px;
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .view-header { margin-bottom: 22px; }
+  .eyebrow {
+    font-family: var(--body);
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+  }
+  .view-header h1 {
+    font-family: var(--display);
+    font-size: 25px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .view-header .sub { color: var(--text-muted); font-size: 14px; margin-top: 6px; max-width: 60ch; }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-head .label {
+    font-family: var(--body);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .panel-body { padding: 18px; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .stat {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .stat .k { font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; }
+  .stat .v {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .stat .v small { font-family: var(--body); font-size: 12px; font-weight: 400; color: var(--text-muted); }
+
+  .pulse-wrap { display: flex; align-items: center; gap: 14px; }
+  #pulseCanvas { display: block; }
+  .pulse-caption { font-size: 12px; color: var(--text-muted); }
+  .pulse-caption .now { font-family: var(--mono); color: var(--accent); font-weight: 700; }
+
+  .insight-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  .insight-text .metric { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 100px;
+    letter-spacing: 0.01em;
+  }
+  .pill-planned { background: var(--surface-2); color: var(--text-muted); }
+  .pill-completed { background: var(--good-tint); color: var(--good); }
+  .pill-suggested { background: var(--accent-2-tint); color: var(--accent-2); }
+  .pill-accepted { background: var(--good-tint); color: var(--good); }
+  .pill-rejected { background: var(--surface-2); color: var(--text-muted); }
+  .pill-superseded { background: var(--surface-2); color: var(--text-muted); text-decoration: line-through; }
+  .pill-rest { background: var(--surface-2); color: var(--text-muted); }
+
+  .suggestion-panel { border-color: var(--accent-2); }
+  .suggestion-panel .panel-head { background: var(--accent-2-tint); border-bottom-color: var(--accent-2); }
+  .suggestion-swap {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center;
+    margin: 14px 0 18px;
+  }
+  .swap-card { border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; }
+  .swap-card .tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 6px; }
+  .swap-card .title { font-weight: 600; font-size: 14.5px; margin-bottom: 3px; }
+  .swap-card .detail { font-size: 13px; color: var(--text-muted); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .swap-card.was .title { text-decoration: line-through; color: var(--text-muted); }
+  .swap-arrow { color: var(--accent-2); font-size: 18px; }
+  .suggestion-reason { font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px; }
+  .suggestion-reason strong { color: var(--text); font-weight: 600; }
+  .action-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .checkin-nudge {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: var(--surface-2);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    font-size: 13.5px;
+  }
+
+  /* ---------- Weekly manifest (table) ---------- */
+  .manifest { width: 100%; border-collapse: collapse; }
+  .manifest thead th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .manifest tbody tr {
+    cursor: pointer;
+    transition: background-color 100ms ease;
+  }
+  .manifest tbody tr:hover { background: var(--surface-2); }
+  .manifest tbody tr.is-today { background: var(--accent-tint); }
+  .manifest tbody tr.is-today:hover { background: var(--accent-tint); filter: brightness(0.97); }
+  .manifest tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  .manifest tbody tr:last-child td { border-bottom: none; }
+  .day-col .dow { font-weight: 600; }
+  .day-col .date { color: var(--text-muted); font-size: 12.5px; }
+  .sport-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600;
+  }
+  .sport-dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .sport-run { color: #B45A2E; } .sport-run .sport-dot { background: #B45A2E; }
+  .sport-trail_run { color: #7A7A2E; } .sport-trail_run .sport-dot { background: #7A7A2E; }
+  .sport-ride { color: #2E6FB4; } .sport-ride .sport-dot { background: #2E6FB4; }
+  .sport-mtb { color: #2E8F6F; } .sport-mtb .sport-dot { background: #2E8F6F; }
+  .sport-swim { color: #2E5FB4; } .sport-swim .sport-dot { background: #2E5FB4; }
+  .sport-rest { color: var(--text-muted); } .sport-rest .sport-dot { background: var(--text-muted); }
+  @media (prefers-color-scheme: dark) {
+    .sport-run { color: #E0916A; } .sport-run .sport-dot { background: #E0916A; }
+    .sport-trail_run { color: #C7C767; } .sport-trail_run .sport-dot { background: #C7C767; }
+    .sport-ride { color: #7BAEE0; } .sport-ride .sport-dot { background: #7BAEE0; }
+    .sport-mtb { color: #6FCBAA; } .sport-mtb .sport-dot { background: #6FCBAA; }
+    .sport-swim { color: #7B9EE0; } .sport-swim .sport-dot { background: #7B9EE0; }
+  }
+  .target-cell { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: 13px; }
+  .manifest-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-muted);
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10, 14, 13, 0.45);
+    align-items: flex-start;
+    justify-content: center;
+    padding: 8vh 16px;
+    z-index: 50;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 460px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head h2 { font-family: var(--display); font-size: 17px; font-weight: 600; margin: 0; }
+  .modal-close {
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 18px; line-height: 1; padding: 4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 18px 20px 4px; }
+  .modal-foot { padding: 16px 20px 20px; display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 12.5px; font-weight: 600;
+    margin-bottom: 6px; color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .field select, .field input[type="text"], .field input[type="number"], .field textarea {
+    width: 100%;
+    font-family: var(--body);
+    font-size: 14px;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .field select:focus, .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 64px; font-family: var(--body); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .slider-field .slider-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .slider-field .slider-val { font-family: var(--mono); font-weight: 700; color: var(--accent-2); }
+  input[type="range"] {
+    width: 100%; accent-color: var(--accent-2);
+  }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--text);
+    color: var(--bg);
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+    z-index: 60;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 720px) {
+    .app-shell.active { grid-template-columns: 1fr; }
+    .rail { display: none; }
+    .main { padding: 20px; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .suggestion-swap { grid-template-columns: 1fr; }
+    .swap-arrow { transform: rotate(90deg); justify-self: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<!-- ============ SIGN-IN ============ -->
+<div id="screen-signin">
+  <div class="signin-card">
+    <div class="brand-mark">
+      <canvas id="logoCanvas" width="28" height="28" aria-hidden="true"></canvas>
+      <span class="brand-name">Quamentum</span>
+    </div>
+    <h1>Read today. Adjust tomorrow.</h1>
+    <p class="lede">Plan your training week, sync it against what Strava actually recorded, and get one clear read on what to change before your next session.</p>
+    <button class="btn btn-block signin-strava" onclick="connectStrava()">
+      Connect with Strava
+    </button>
+    <p class="signin-fineprint">We'll only ever read your own activities. Nothing posts back to Strava.</p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div class="app-shell" id="appShell">
+  <nav class="rail" aria-label="Primary">
+    <div class="brand-mark">
+      <canvas id="logoCanvasRail" width="22" height="22" aria-hidden="true"></canvas>
+      <span class="brand-name">Quamentum</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-eyebrow">Athlete</div>
+      <button class="nav-item" aria-current="page" data-view="dashboard" onclick="showView('dashboard', this)">
+        <span class="nav-dot"></span> Today
+      </button>
+      <button class="nav-item" data-view="plan" onclick="showView('plan', this)">
+        <span class="nav-dot"></span> Weekly plan
+      </button>
+    </div>
+    <div class="rail-footer">
+      <strong>Jordan Reyes</strong>
+      Connected via Strava
+      <div style="margin-top:8px;">
+        <button class="btn btn-ghost btn-small" style="padding-left:0;" onclick="signOut()">Disconnect</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- ---------- DASHBOARD VIEW ---------- -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-header">
+        <p class="eyebrow">Tuesday, July 14</p>
+        <h1>Today's read</h1>
+        <p class="sub">Yesterday's tempo run came in hotter than planned. Here's what that changes for tomorrow.</p>
+      </div>
+
+      <div class="checkin-nudge" id="checkinNudge">
+        <span>You haven't logged how you're feeling today yet.</span>
+        <button class="btn btn-outline btn-small" onclick="openCheckin()">Log check-in</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="label">Yesterday · Monday, July 13</span>
+          <span class="pill pill-completed">Completed</span>
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <div class="stat"><span class="k">Sport</span><span class="v" style="font-family:var(--body); font-size:15px;">Tempo Run</span></div>
+            <div class="stat"><span class="k">Planned pace</span><span class="v">7:30 <small>/mi</small></span></div>
+            <div class="stat"><span class="k">Actual pace</span><span class="v" style="color:var(--crit);">6:52 <small>/mi</small></span></div>
+            <div class="stat"><span class="k">Avg HR</span><span class="v">168 <small>bpm · Z4</small></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="label">Quamentum read</span>
+          <div class="pulse-wrap">
+            <canvas id="pulseCanvas" width="120" height="28"></canvas>
+            <span class="pulse-caption">14-day load · <span class="now">rising</span></span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <p class="insight-text">You ran the tempo <span class="metric">38 sec/mi</span> faster than planned and held <span class="metric">Zone 4</span> for most of it &mdash; more like a race effort than a tempo effort. Combined with two short nights this week, that's enough accumulated strain to matter before tomorrow's ride.</p>
+        </div>
+      </div>
+
+      <div class="panel suggestion-panel" id="suggestionPanel">
+        <div class="panel-head">
+          <span class="label" style="color:var(--accent-2);">Suggested change for tomorrow</span>
+          <span class="pill pill-suggested">Awaiting review</span>
+        </div>
+        <div class="panel-body">
+          <div class="suggestion-swap">
+            <div class="swap-card was">
+              <div class="tag">Currently planned</div>
+              <div class="title">Tempo Ride</div>
+              <div class="detail">60 min · 235W avg</div>
+            </div>
+            <div class="swap-arrow" aria-hidden="true">&rarr;</div>
+            <div class="swap-card">
+              <div class="tag" style="color:var(--accent-2);">Suggested</div>
+              <div class="title">Recovery Spin</div>
+              <div class="detail">40 min · Zone 2</div>
+            </div>
+          </div>
+          <p class="suggestion-reason"><strong>Why:</strong> Yesterday's effort already delivered the training stress this week's tempo ride was meant to add. Swapping to an easy spin protects Thursday's long ride.</p>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="acceptSuggestion()">Accept</button>
+            <button class="btn btn-outline" onclick="editSuggestion()">Edit before accepting</button>
+            <button class="btn btn-ghost" onclick="rejectSuggestion()">Keep original</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PLAN VIEW ---------- -->
+    <section class="view" id="view-plan">
+      <div class="view-header">
+        <p class="eyebrow">Week of July 13</p>
+        <h1>Weekly plan</h1>
+        <p class="sub">Click any day to add or edit a workout. Suggested changes from Quamentum show up here once you decide on them.</p>
+      </div>
+
+      <div class="panel">
+        <div style="overflow-x:auto;">
+          <table class="manifest">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Sport</th>
+                <th>Type</th>
+                <th>Target</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="manifestBody"></tbody>
+          </table>
+        </div>
+        <div class="manifest-foot">
+          <span>5 sports available: Run, Trail Run, Ride, MTB, Swim</span>
+          <span id="weekSummary"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ BUILDER MODAL ============ -->
+<div class="modal-backdrop" id="builderBackdrop" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="builderTitle">Edit workout</h2>
+      <button class="modal-close" aria-label="Close" onclick="closeModal('builderBackdrop')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-top:0;" id="builderDayLabel">Wednesday, July 15</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="builderSport">Sport</label>
+          <select id="builderSport">
+            <option value="run">Run</option>
+            <option value="trail_run">Trail Run</option>
+            <option value="ride">Ride</option>
+            <option value="mtb">Mountain Bike</option>
+            <option value="swim">Swim</option>
+            <option value="rest">Rest day</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="builderType">Workout type</label>
+          <select id="builderType">
+            <option value="easy">Easy</option>
+            <option value="tempo">Tempo</option>
+            <option value="interval">Interval</option>
+            <option value="long">Long</option>
+            <option value="recovery">Recovery</option>
+            <option value="technique">Technique</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="builderDuration">Duration (min)</label>
+          <input type="number" id="builderDuration" placeholder="45">
+        </div>
+        <div class="field">
+          <label for="builderDistance">Distance</label>
+          <input type="text" id="builderDistance" placeholder="e.g. 6 mi">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="builderMetric">Target metric</label>
+          <select id="builderMetric">
+            <option value="pace">Pace</option>
+            <option value="power">Power</option>
+            <option value="hr_zone">HR zone</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="builderValue">Target value</label>
+          <input type="text" id="builderValue" placeholder="e.g. 7:30/mi">
+        </div>
+      </div>
+      <div class="field">
+        <label for="builderNotes">Notes</label>
+        <textarea id="builderNotes" placeholder="Optional coaching note to yourself"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('builderBackdrop')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBuilder()">Save workout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHECK-IN MODAL ============ -->
+<div class="modal-backdrop" id="checkinBackdrop" role="dialog" aria-modal="true" aria-labelledby="checkinTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="checkinTitle">Today's check-in</h2>
+      <button class="modal-close" aria-label="Close" onclick="closeModal('checkinBackdrop')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="ciSleep">Hours of sleep</label>
+        <input type="number" id="ciSleep" placeholder="7.5" step="0.5">
+      </div>
+      <div class="field slider-field">
+        <div class="slider-top"><label for="ciSoreness" style="margin:0;">Soreness</label><span class="slider-val" id="sorenessVal">3</span></div>
+        <input type="range" id="ciSoreness" min="1" max="5" value="3" oninput="document.getElementById('sorenessVal').textContent=this.value">
+      </div>
+      <div class="field slider-field">
+        <div class="slider-top"><label for="ciEnergy" style="margin:0;">Energy</label><span class="slider-val" id="energyVal">3</span></div>
+        <input type="range" id="ciEnergy" min="1" max="5" value="3" oninput="document.getElementById('energyVal').textContent=this.value">
+      </div>
+      <div class="field">
+        <label for="ciNote">Anything else? (optional)</label>
+        <textarea id="ciNote" placeholder="e.g. tight calf since Sunday"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('checkinBackdrop')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCheckin()">Save check-in</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // ---------- Logo (canvas signal mark) ----------
+  function drawLogo(id, size) {
+    var c = document.getElementById(id);
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    ctx.clearRect(0,0,size,size);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    var mid = size/2;
+    ctx.moveTo(1, mid);
+    ctx.lineTo(size*0.28, mid);
+    ctx.lineTo(size*0.4, size*0.18);
+    ctx.lineTo(size*0.58, size*0.85);
+    ctx.lineTo(size*0.7, mid);
+    ctx.lineTo(size-1, mid);
+    ctx.stroke();
+  }
+  drawLogo('logoCanvas', 28);
+  drawLogo('logoCanvasRail', 22);
+
+  // ---------- Sparkline ----------
+  function drawPulse() {
+    var c = document.getElementById('pulseCanvas');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    var w = c.width, h = c.height;
+    var data = [4,5,4,6,7,6,8,7,9,8,10,9,11,12.4];
+    var max = Math.max.apply(null, data), min = Math.min.apply(null, data);
+    var border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, h-0.5);
+    ctx.lineTo(w, h-0.5);
+    ctx.stroke();
+    var pts = data.map(function(v,i){
+      var x = (i/(data.length-1)) * (w-4) + 2;
+      var y = h - 4 - ((v-min)/(max-min)) * (h-8);
+      return [x,y];
+    });
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], h);
+    pts.forEach(function(p){ ctx.lineTo(p[0], p[1]); });
+    ctx.lineTo(pts[pts.length-1][0], h);
+    ctx.closePath();
+    ctx.fillStyle = accent + '22';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 1.5;
+    pts.forEach(function(p,i){ i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]); });
+    ctx.stroke();
+    var last = pts[pts.length-1];
+    ctx.beginPath();
+    ctx.arc(last[0], last[1], 2.5, 0, Math.PI*2);
+    ctx.fillStyle = accent;
+    ctx.fill();
+  }
+
+  // ---------- Screen / view switching ----------
+  function connectStrava() {
+    document.getElementById('screen-signin').style.display = 'none';
+    var shell = document.getElementById('appShell');
+    shell.classList.add('active');
+    drawPulse();
+    renderManifest();
+    toast('Connected — pulled in your last 14 days from Strava.');
+  }
+
+  function signOut() {
+    document.getElementById('appShell').classList.remove('active');
+    document.getElementById('screen-signin').style.display = 'flex';
+  }
+
+  function showView(name, btn) {
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.removeAttribute('aria-current'); });
+    if (btn) btn.setAttribute('aria-current', 'page');
+  }
+
+  // ---------- Weekly plan data ----------
+  var sportLabels = { run: 'Run', trail_run: 'Trail Run', ride: 'Ride', mtb: 'Mountain Bike', swim: 'Swim', rest: 'Rest' };
+  var typeLabels = { easy: 'Easy', tempo: 'Tempo', interval: 'Interval', long: 'Long', recovery: 'Recovery', technique: 'Technique', '': '—' };
+  var statusLabels = {
+    planned: ['Planned','pill-planned'],
+    completed: ['Completed','pill-completed'],
+    pending_review: ['Awaiting review','pill-suggested'],
+    accepted: ['Updated','pill-accepted'],
+    rejected: ['Kept original','pill-rejected'],
+    superseded: ['Replaced','pill-superseded'],
+    rest: ['Rest','pill-rest']
+  };
+
+  var week = [
+    { dow:'Mon', date:'Jul 13', sport:'run', type:'tempo', duration:45, distance:'6 mi', metric:'pace', value:'7:30/mi', status:'completed', notes:'' },
+    { dow:'Tue', date:'Jul 14', sport:'ride', type:'tempo', duration:60, distance:'', metric:'power', value:'235W', status:'planned', notes:'', today:true },
+    { dow:'Wed', date:'Jul 15', sport:'swim', type:'technique', duration:40, distance:'2000 m', metric:'', value:'', status:'planned', notes:'' },
+    { dow:'Thu', date:'Jul 16', sport:'run', type:'interval', duration:50, distance:'', metric:'pace', value:'6x4min @ 5:40/mi', status:'planned', notes:'' },
+    { dow:'Fri', date:'Jul 17', sport:'rest', type:'', duration:null, distance:'', metric:'', value:'', status:'rest', notes:'' },
+    { dow:'Sat', date:'Jul 18', sport:'mtb', type:'long', duration:150, distance:'', metric:'hr_zone', value:'Z2', status:'planned', notes:'' },
+    { dow:'Sun', date:'Jul 19', sport:'trail_run', type:'long', duration:90, distance:'10 mi', metric:'hr_zone', value:'Z2', status:'planned', notes:'' }
+  ];
+
+  function targetText(day) {
+    if (day.sport === 'rest') return '—';
+    var bits = [];
+    if (day.duration) bits.push(day.duration + ' min');
+    if (day.distance) bits.push(day.distance);
+    if (day.value) bits.push(day.value);
+    return bits.join(' · ') || '—';
+  }
+
+  function renderManifest() {
+    var body = document.getElementById('manifestBody');
+    body.innerHTML = '';
+    week.forEach(function(day, i){
+      var tr = document.createElement('tr');
+      if (day.today) tr.classList.add('is-today');
+      tr.onclick = function(){ openBuilder(i); };
+      var statusInfo = statusLabels[day.status] || statusLabels.planned;
+      tr.innerHTML =
+        '<td class="day-col"><span class="dow">' + day.dow + '</span><br><span class="date">' + day.date + '</span></td>' +
+        '<td><span class="sport-tag sport-' + day.sport + '"><span class="sport-dot"></span>' + sportLabels[day.sport] + '</span></td>' +
+        '<td>' + (typeLabels[day.type] || '—') + '</td>' +
+        '<td class="target-cell">' + targetText(day) + '</td>' +
+        '<td><span class="pill ' + statusInfo[1] + '">' + statusInfo[0] + '</span></td>';
+      body.appendChild(tr);
+    });
+    var completed = week.filter(function(d){ return d.status === 'completed' || d.status === 'accepted'; }).length;
+    document.getElementById('weekSummary').textContent = completed + ' of 7 days logged';
+  }
+
+  // ---------- Builder modal ----------
+  var editingIndex = null;
+  function openBuilder(i) {
+    editingIndex = i;
+    var day = week[i];
+    document.getElementById('builderTitle').textContent = day.today ? 'Edit today’s workout' : 'Edit workout';
+    document.getElementById('builderDayLabel').textContent = day.dow + ', ' + day.date;
+    document.getElementById('builderSport').value = day.sport === 'rest' ? 'rest' : day.sport;
+    document.getElementById('builderType').value = day.type || 'easy';
+    document.getElementById('builderDuration').value = day.duration || '';
+    document.getElementById('builderDistance').value = day.distance || '';
+    document.getElementById('builderMetric').value = day.metric || 'pace';
+    document.getElementById('builderValue').value = day.value || '';
+    document.getElementById('builderNotes').value = day.notes || '';
+    openModal('builderBackdrop');
+  }
+
+  function saveBuilder() {
+    if (editingIndex === null) return;
+    var day = week[editingIndex];
+    day.sport = document.getElementById('builderSport').value;
+    day.type = day.sport === 'rest' ? '' : document.getElementById('builderType').value;
+    day.duration = document.getElementById('builderDuration').value ? Number(document.getElementById('builderDuration').value) : null;
+    day.distance = document.getElementById('builderDistance').value;
+    day.metric = document.getElementById('builderMetric').value;
+    day.value = document.getElementById('builderValue').value;
+    day.notes = document.getElementById('builderNotes').value;
+    day.status = day.sport === 'rest' ? 'rest' : 'planned';
+    closeModal('builderBackdrop');
+    renderManifest();
+    toast('Workout saved for ' + day.dow + '.');
+  }
+
+  // ---------- Suggestion actions ----------
+  function acceptSuggestion() {
+    week[1].sport = 'ride';
+    week[1].type = 'recovery';
+    week[1].duration = 40;
+    week[1].distance = '';
+    week[1].metric = 'hr_zone';
+    week[1].value = 'Z2';
+    week[1].status = 'accepted';
+    renderManifest();
+    var panel = document.getElementById('suggestionPanel');
+    panel.querySelector('.panel-body').innerHTML = '<p style="margin:0;color:var(--good);font-size:14px;">Tomorrow’s plan is now a 40-minute Zone 2 recovery spin.</p>';
+    panel.querySelector('.pill').className = 'pill pill-accepted';
+    panel.querySelector('.pill').textContent = 'Updated';
+    toast('Suggestion accepted — Tuesday’s ride is now a recovery spin.');
+  }
+
+  function editSuggestion() {
+    week[1].sport = 'ride';
+    week[1].type = 'recovery';
+    week[1].duration = 40;
+    week[1].metric = 'hr_zone';
+    week[1].value = 'Z2';
+    openBuilder(1);
+    toast('Adjust anything, then save to confirm.');
+  }
+
+  function rejectSuggestion() {
+    var panel = document.getElementById('suggestionPanel');
+    panel.querySelector('.panel-body').innerHTML = '<p style="margin:0;color:var(--text-muted);font-size:14px;">Kept the original tempo ride on the plan for tomorrow.</p>';
+    panel.querySelector('.pill').className = 'pill pill-rejected';
+    panel.querySelector('.pill').textContent = 'Kept original';
+    toast('Original plan kept for tomorrow.');
+  }
+
+  // ---------- Check-in ----------
+  function openCheckin() { openModal('checkinBackdrop'); }
+  function submitCheckin() {
+    closeModal('checkinBackdrop');
+    document.getElementById('checkinNudge').innerHTML = '<span>Check-in logged for today &mdash; thanks.</span>';
+    toast('Check-in saved.');
+  }
+
+  // ---------- Modal plumbing ----------
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  document.querySelectorAll('.modal-backdrop').forEach(function(bd){
+    bd.addEventListener('click', function(e){ if (e.target === bd) closeModal(bd.id); });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.active').forEach(function(bd){ closeModal(bd.id); });
+  });
+
+  // ---------- Toast ----------
+  var toastTimer;
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
+  }
+</script>
