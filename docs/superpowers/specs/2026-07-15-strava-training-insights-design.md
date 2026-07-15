@@ -23,6 +23,8 @@ reviews and accepts, edits, or rejects.
 - Let an athlete add an upcoming race — including multi-leg races like
   duathlon/triathlon — and generate a periodized training plan leading up to
   it, refined week by week as real performance data comes in.
+- Let an athlete browse their plan by week or by month, with race days
+  visible alongside training days, not just the current week.
 
 ## Non-Goals (v1)
 
@@ -68,6 +70,12 @@ Strava."
   call.
 - **Email**: A transactional email provider (e.g. Resend) sends the daily
   digest, linking back into the app for any action.
+- **Calendar data**: `GET /api/plan?start=<date>&end=<date>` returns planned
+  workouts, matched activities, and race markers for an inclusive date range.
+  It's a single read path over existing tables (`planned_workouts`,
+  `activities`, `race_events`) scoped by range — both Week view (a 7-day
+  range) and Month view (the full 5–6 week visible grid) call the same
+  endpoint rather than having separate data-fetching logic.
 
 This keeps the whole system in one deployable unit — appropriate for a
 small-group app with no need for independently scaled services.
@@ -119,6 +127,11 @@ small-group app with no need for independently scaled services.
   it's slotted into the driving block's week as a specific workout instead of
   restarting periodization.
 
+The calendar (Week/Month browsing) introduces no new tables — it's a read
+path over `planned_workouts`, `activities`, and `race_events` scoped by
+whatever date range is currently visible, rather than always "today"/"this
+week."
+
 Activities are matched to a planned workout by same-day + same-sport. If no
 match exists, the insight still generates — it just omits the "vs. plan"
 comparison and comments on the activity and trend alone. If multiple planned
@@ -127,10 +140,12 @@ unmatched one; the rest are left unmatched rather than guessed.
 
 ## Core Flows
 
-**Plan authoring** — The athlete opens a weekly grid view (day × sport ×
-workout). Clicking a day opens a structured builder (sport, workout type,
-duration/distance, target pace/power/HR zone, notes). Saved as a
-`planned_workouts` row with `source=user`.
+**Plan authoring** — The athlete's Plan screen shows a day × sport × workout
+grid, toggling between Week view (7 days, full detail) and Month view (a
+browsable overview — see Calendar Navigation below). In Week view, clicking a
+day opens a structured builder (sport, workout type, duration/distance,
+target pace/power/HR zone, notes). Saved as a `planned_workouts` row with
+`source=user`.
 
 **Activity sync** — Strava webhook fires → handler resolves the local user
 from `strava_athlete_id` → fetches full activity details from the Strava API
@@ -214,6 +229,42 @@ doesn't trigger new generation. When that week's detail step runs, the engine
 passes the B/C race's date/goal as additional context so Claude can place a
 race-effort or tune-up day around it rather than a conflicting hard session.
 
+### Calendar Navigation
+
+**Navigate by week/month** — `‹`/`›` controls shift a shared `focusedDate` by
+7 days (Week view) or one calendar month (Month view), triggering a new
+`GET /api/plan` call for the newly visible range. A "Today" shortcut resets
+`focusedDate` to the current date in either mode.
+
+**Switch Week ⇄ Month** — Toggling view mode keeps `focusedDate` fixed and
+re-fetches for the new mode's range — Month view on a day in October,
+switched to Week view, lands on the October week containing that day. No
+jump to "today" on toggle.
+
+**Month view** — A standard 7-column grid; leading/trailing days from
+adjacent months render dimmed and unclickable. Each in-month day shows a
+sport-dot with one of three fill states — completed, planned, or suggested
+(awaiting review) — collapsing the full `planned_workouts.status` set down
+for month-grid space: `accepted` displays as planned (it's the active plan),
+`rejected`/`superseded` display as whatever status the row that stands in
+their place has. A distinct race marker appears on any day matching a
+`race_event_id`.
+
+**Click a day cell (Month view)** — Switches to Week view with `focusedDate`
+set to that day, showing its full week. (Dimmed adjacent-month fillers are
+unclickable; navigating `›` to that month is how you actually reach them.)
+
+**Click a day row (Week view)** — Unchanged for today/future: opens the
+builder. For any day strictly before today: opens a read-only detail view
+(same information, no editable fields) instead — history reflects what
+Strava actually synced and what insights were generated against, and isn't
+retroactively rewritten.
+
+**Race markers** — Clicking a race day (past or future, either view)
+navigates to the Races tab and scrolls to that race's card, rather than
+opening the day builder — races are edited from the Races tab, not the
+calendar.
+
 ## Error Handling
 
 - **Strava token expiry/revocation**: Refresh automatically on a 401 from the
@@ -252,6 +303,19 @@ race-effort or tune-up day around it rather than a conflicting hard session.
   while one is already driving the plan, the app flags the conflict and asks
   the athlete to demote one to B/C or choose which drives the plan — it does
   not attempt to merge two peak/taper arcs.
+- **Empty calendar range** (a far-future or far-past month with no data yet):
+  renders the grid normally with all days empty — not an error, just nothing
+  scheduled there yet.
+- **`/api/plan` fetch failure on navigation**: keep showing the previously
+  loaded range with an inline retry affordance, rather than clearing the view
+  to blank on a transient network error.
+- **Rapid navigation** (clicking `›` repeatedly before a fetch resolves):
+  each request carries the range it was for; only the response matching the
+  *current* `focusedDate`/range is applied, so a slow earlier response can't
+  overwrite a newer one the athlete has already navigated past.
+- **Race marker for a since-removed race**: falls back to showing the day's
+  regular training content instead of erroring, since the marker is just a
+  join against current `race_events`.
 
 ## Testing
 
@@ -282,3 +346,15 @@ race-effort or tune-up day around it rather than a conflicting hard session.
   generating a plan with an existing partially-filled week to see the
   conflict summary, and walking through a full base→build→peak→taper arc for
   a marathon-length plan to sanity-check the phase pacing reads naturally.
+- **Unit tests (calendar)**: month-grid generation (correct leading/trailing
+  days for months starting/ending mid-week, leap-year February),
+  `focusedDate` step math for week/month navigation, and the past/future
+  read-only boundary (today itself must stay editable, not read-only).
+- **Integration tests (calendar)**: `GET /api/plan` range queries against
+  seeded data (a week range, a full month-grid range, a range spanning two
+  months); the stale-response race condition where a slow request for an old
+  range resolves after a newer one.
+- **Manual/exploratory (calendar)**: navigating several months forward and
+  back, switching Week⇄Month mid-browse and confirming the date carries
+  over, clicking a race marker from Month view, and confirming a past day
+  opens read-only while today/future still opens the builder.
