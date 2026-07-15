@@ -396,6 +396,60 @@
     font-size: 12.5px; color: var(--text-muted);
   }
 
+  /* ---------- Plan toolbar (Week/Month toggle + nav) ---------- */
+  .plan-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .view-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .toggle-btn {
+    font-family: var(--body); font-size: 13px; font-weight: 600;
+    padding: 7px 16px; border: none; background: var(--surface); color: var(--text-muted);
+    cursor: pointer;
+  }
+  .toggle-btn + .toggle-btn { border-left: 1px solid var(--border); }
+  .toggle-btn.active { background: var(--accent-tint); color: var(--text); }
+  .plan-nav { display: flex; align-items: center; gap: 10px; }
+  .nav-arrow {
+    width: 30px; height: 30px; border-radius: 3px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .nav-arrow:hover { background: var(--surface-2); }
+  .plan-nav-label {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 13.5px; font-weight: 600; min-width: 150px; text-align: center;
+  }
+  .plan-preview-note { font-size: 13px; color: var(--text-muted); }
+
+  /* ---------- Month grid ---------- */
+  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); }
+  .month-weekday-head {
+    background: var(--surface-2); padding: 8px 4px; text-align: center;
+    font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted);
+  }
+  .month-cell { background: var(--surface); min-height: 74px; padding: 8px; cursor: pointer; position: relative; }
+  .month-cell:hover:not(.is-filler) { background: var(--surface-2); }
+  .month-cell.is-filler { background: var(--bg); color: var(--text-muted); opacity: 0.5; cursor: default; }
+  .month-cell.is-today { box-shadow: inset 0 0 0 2px var(--accent); }
+  .month-cell .mc-date { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px; }
+  .month-cell .mc-dot { width: 9px; height: 9px; border-radius: 2px; margin-top: 8px; }
+  .mc-dot.state-completed { background: currentColor; }
+  .mc-dot.state-planned { background: transparent; border: 2px solid currentColor; }
+  .mc-dot.state-suggested { background: transparent; border: 2px dashed var(--accent-2); }
+  .month-cell .mc-race {
+    position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent-2);
+  }
+
+  /* ---------- Race day row (Week view) ---------- */
+  .manifest tbody tr.is-race-row { background: var(--accent-2-tint); }
+  .manifest tbody tr.is-race-row:hover { background: var(--accent-2-tint); filter: brightness(0.97); }
+  .race-row-tag {
+    font-size: 10.5px; color: var(--accent-2); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
   /* ---------- Race context (dashboard) ---------- */
   .race-countdown {
     display: inline-flex; align-items: center; gap: 8px;
@@ -626,7 +680,7 @@
         <span class="nav-dot"></span> Today
       </button>
       <button class="nav-item" data-view="plan" onclick="showView('plan', this)">
-        <span class="nav-dot"></span> Weekly plan
+        <span class="nav-dot"></span> Plan
       </button>
       <button class="nav-item" data-view="races" onclick="showView('races', this)">
         <span class="nav-dot"></span> Races
@@ -716,29 +770,51 @@
     <!-- ---------- PLAN VIEW ---------- -->
     <section class="view" id="view-plan">
       <div class="view-header">
-        <p class="eyebrow">Week of July 13</p>
-        <h1>Weekly plan</h1>
+        <p class="eyebrow">Training plan</p>
+        <h1>Plan</h1>
         <p class="sub">Click any day to add or edit a workout. Suggested changes from Quamentum show up here once you decide on them.</p>
       </div>
 
-      <div class="panel">
-        <div style="overflow-x:auto;">
-          <table class="manifest">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Sport</th>
-                <th>Type</th>
-                <th>Target</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="manifestBody"></tbody>
-          </table>
+      <div class="plan-toolbar">
+        <div class="view-toggle">
+          <button class="toggle-btn active" id="toggleWeekBtn" onclick="setViewMode('week')">Week</button>
+          <button class="toggle-btn" id="toggleMonthBtn" onclick="setViewMode('month')">Month</button>
         </div>
-        <div class="manifest-foot">
-          <span>5 sports available: Run, Trail Run, Ride, MTB, Swim</span>
-          <span id="weekSummary"></span>
+        <div class="plan-nav">
+          <button class="nav-arrow" onclick="stepFocus(-1)" aria-label="Previous">&lsaquo;</button>
+          <span class="plan-nav-label" id="planNavLabel"></span>
+          <button class="nav-arrow" onclick="stepFocus(1)" aria-label="Next">&rsaquo;</button>
+          <button class="btn btn-ghost btn-small" onclick="goToday()">Today</button>
+        </div>
+      </div>
+
+      <div id="weekViewContainer">
+        <div class="panel" id="weekPreviewBanner" style="display:none;"></div>
+        <div class="panel">
+          <div style="overflow-x:auto;">
+            <table class="manifest">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Sport</th>
+                  <th>Type</th>
+                  <th>Target</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="manifestBody"></tbody>
+            </table>
+          </div>
+          <div class="manifest-foot">
+            <span>5 sports available: Run, Trail Run, Ride, MTB, Swim</span>
+            <span id="weekSummary"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="monthViewContainer" style="display:none;">
+        <div class="panel">
+          <div class="month-grid" id="monthGrid"></div>
         </div>
       </div>
     </section>
@@ -929,6 +1005,20 @@
   </div>
 </div>
 
+<!-- ============ DAY DETAIL MODAL (read-only) ============ -->
+<div class="modal-backdrop" id="dayDetailBackdrop" role="dialog" aria-modal="true" aria-labelledby="dayDetailTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="dayDetailTitle">Workout detail</h2>
+      <button class="modal-close" aria-label="Close" onclick="closeModal('dayDetailBackdrop')">&times;</button>
+    </div>
+    <div class="modal-body" id="dayDetailBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('dayDetailBackdrop')">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1020,6 +1110,30 @@
     if (btn) btn.setAttribute('aria-current', 'page');
   }
 
+  // ---------- Calendar helpers ----------
+  var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function isSameDate(a, b) { return !!a && !!b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function mondayOf(d) {
+    var nd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var day = nd.getDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    nd.setDate(nd.getDate() + diff);
+    return nd;
+  }
+  function formatShort(d) { return monthNames[d.getMonth()].slice(0, 3) + ' ' + d.getDate(); }
+  function daysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
+
+  var REAL_TODAY = new Date(2026, 6, 14); // Tuesday, July 14, 2026
+  var REAL_WEEK_MONDAY = mondayOf(REAL_TODAY);
+  var REAL_WEEK_KEY = isoDate(REAL_WEEK_MONDAY);
+
+  var focusedDate = new Date(REAL_TODAY);
+  var viewMode = 'week'; // 'week' | 'month'
+  var previewWeeks = {}; // mondayKey -> generated 7-day array (non-current weeks only)
+
   // ---------- Weekly plan data ----------
   var sportLabels = { run: 'Run', trail_run: 'Trail Run', ride: 'Ride', mtb: 'Mountain Bike', swim: 'Swim', rest: 'Rest' };
   var typeLabels = { easy: 'Easy', tempo: 'Tempo', interval: 'Interval', long: 'Long', recovery: 'Recovery', technique: 'Technique', '': '—' };
@@ -1043,17 +1157,61 @@
     { dow:'Sun', date:'Jul 19', sport:'trail_run', type:'long', duration:90, distance:'16 km', metric:'hr_zone', value:'Z2', status:'planned', notes:'' }
   ];
 
+  week.forEach(function(day, i){
+    var dt = new Date(REAL_WEEK_MONDAY);
+    dt.setDate(dt.getDate() + i);
+    day.dateObj = dt;
+  });
+
+  // ---------- Preview weeks (any week other than the current one) ----------
+  var previewSportCycle = ['run', 'ride', 'swim', 'run', 'rest', 'mtb', 'trail_run'];
+  var previewTypeCycle = ['easy', 'tempo', 'technique', 'interval', 'rest', 'long', 'long'];
+
+  function generateWeekPreview(monday) {
+    var key = isoDate(monday);
+    if (previewWeeks[key]) return previewWeeks[key];
+    var weeksFromReal = Math.round((monday - REAL_WEEK_MONDAY) / (7 * 86400000));
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(monday);
+      d.setDate(d.getDate() + i);
+      var idx = ((i + weeksFromReal) % 7 + 7) % 7;
+      var sport = previewSportCycle[idx];
+      var isPast = d < REAL_TODAY;
+      days.push({
+        dow: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i],
+        date: formatShort(d),
+        sport: sport,
+        type: sport === 'rest' ? '' : previewTypeCycle[idx],
+        duration: sport === 'rest' ? null : 30 + idx * 5,
+        distance: '',
+        metric: sport === 'rest' ? '' : (sport === 'ride' || sport === 'mtb' ? 'hr_zone' : 'pace'),
+        value: sport === 'rest' ? '' : (sport === 'ride' || sport === 'mtb' ? 'Z2' : '5:30/km'),
+        status: sport === 'rest' ? 'rest' : (isPast ? 'completed' : 'planned'),
+        notes: '',
+        dateObj: d
+      });
+    }
+    previewWeeks[key] = days;
+    return days;
+  }
+
+  function getWeekDays(monday) {
+    var key = isoDate(monday);
+    return key === REAL_WEEK_KEY ? week : generateWeekPreview(monday);
+  }
+
   // ---------- Race planning data ----------
   var races = [
     {
-      id: 1, name: 'Coastal Half Marathon', date: 'Oct 4, 2026', countdown: '12 weeks away',
+      id: 1, name: 'Coastal Half Marathon', date: 'Oct 4, 2026', dateObj: new Date(2026, 9, 4), countdown: '12 weeks away',
       priority: 'A', goalTime: '1:45:00',
       courseNotes: 'Flat coastal road course, occasional headwind on the return leg.',
       legs: [{ sport: 'run', distance: '21.1 km' }],
       status: 'upcoming', planGenerated: false
     },
     {
-      id: 2, name: 'Riverside 5K Tune-up', date: 'Aug 25, 2026', countdown: '6 weeks away',
+      id: 2, name: 'Riverside 5K Tune-up', date: 'Aug 25, 2026', dateObj: new Date(2026, 7, 25), countdown: '6 weeks away',
       priority: 'B', goalTime: '',
       courseNotes: '',
       legs: [{ sport: 'run', distance: '5 km' }],
@@ -1093,35 +1251,180 @@
     return bits.join(' · ') || '—';
   }
 
+  function raceOnDate(d) {
+    return d && races.find(function(r){ return isSameDate(r.dateObj, d); });
+  }
+
   function renderManifest() {
+    var monday = mondayOf(focusedDate);
+    var key = isoDate(monday);
+    var isRealWeek = key === REAL_WEEK_KEY;
+    var days = getWeekDays(monday);
+    var sundayOfWeek = new Date(monday); sundayOfWeek.setDate(sundayOfWeek.getDate() + 6);
+    var isPastWeek = !isRealWeek && sundayOfWeek < REAL_TODAY;
+
+    var banner = document.getElementById('weekPreviewBanner');
+    if (!isRealWeek) {
+      banner.style.display = 'block';
+      banner.innerHTML = '<div class="panel-body plan-preview-note">' +
+        (isPastWeek
+          ? 'Showing synced history for this week — past days are read-only.'
+          : 'Showing a generated preview for this week — click a day to edit it, or jump to Jul 13–19 for the fully wired demo week.') +
+        '</div>';
+    } else {
+      banner.style.display = 'none';
+    }
+
     var body = document.getElementById('manifestBody');
     body.innerHTML = '';
-    week.forEach(function(day, i){
+    days.forEach(function(day, i){
       var tr = document.createElement('tr');
-      if (day.today) tr.classList.add('is-today');
-      tr.onclick = function(){ openBuilder(i); };
+      if (isSameDate(day.dateObj, REAL_TODAY)) tr.classList.add('is-today');
+      var race = raceOnDate(day.dateObj);
+      if (race) {
+        tr.classList.add('is-race-row');
+        tr.onclick = function(){ goToRaceFromCalendar(day.dateObj); };
+      } else if (isRealWeek) {
+        tr.onclick = function(){ openBuilder(i); };
+      } else if (isPastWeek) {
+        tr.onclick = function(){ openDayDetail(day); };
+      } else {
+        tr.onclick = function(){ openBuilder(i, 'preview', key); };
+      }
       var statusInfo = statusLabels[day.status] || statusLabels.planned;
       tr.innerHTML =
-        '<td class="day-col"><span class="dow">' + day.dow + '</span><br><span class="date">' + day.date + '</span></td>' +
+        '<td class="day-col"><span class="dow">' + day.dow + '</span><br><span class="date">' + day.date + '</span>' +
+          (race ? '<br><span class="race-row-tag">Race day</span>' : '') + '</td>' +
         '<td><span class="sport-tag sport-' + day.sport + '"><span class="sport-dot"></span>' + sportLabels[day.sport] + '</span></td>' +
         '<td>' + (typeLabels[day.type] || '—') + '</td>' +
         '<td class="target-cell">' + targetText(day) + '</td>' +
         '<td><span class="pill ' + statusInfo[1] + '">' + statusInfo[0] + '</span></td>';
       body.appendChild(tr);
     });
-    var completed = week.filter(function(d){ return d.status === 'completed' || d.status === 'accepted'; }).length;
+    var completed = days.filter(function(d){ return d.status === 'completed' || d.status === 'accepted'; }).length;
     document.getElementById('weekSummary').textContent = completed + ' of 7 days logged';
+    updateNavLabel();
+  }
+
+  function dayInfoFor(d) {
+    var days = getWeekDays(mondayOf(d));
+    var idx = (d.getDay() + 6) % 7; // Monday = 0
+    var day = days[idx];
+    return { sport: day.sport, status: day.status, race: raceOnDate(d) };
+  }
+
+  function renderMonthGrid() {
+    var grid = document.getElementById('monthGrid');
+    var year = focusedDate.getFullYear(), month = focusedDate.getMonth();
+    var firstOfMonth = new Date(year, month, 1);
+    var startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first offset
+    var totalDays = daysInMonth(year, month);
+    var totalCells = Math.ceil((startOffset + totalDays) / 7) * 7;
+    var gridStart = new Date(year, month, 1 - startOffset);
+
+    var headHtml = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){
+      return '<div class="month-weekday-head">' + d + '</div>';
+    }).join('');
+
+    var cellsHtml = '';
+    for (var i = 0; i < totalCells; i++) {
+      var d = new Date(gridStart);
+      d.setDate(d.getDate() + i);
+      var inMonth = d.getMonth() === month;
+      var classes = 'month-cell' + (inMonth ? '' : ' is-filler') + (isSameDate(d, REAL_TODAY) ? ' is-today' : '');
+      var dotHtml = '';
+      var raceHtml = '';
+      var onclickAttr = '';
+      if (inMonth) {
+        var info = dayInfoFor(d);
+        if (info.sport && info.sport !== 'rest') {
+          var stateClass = info.status === 'completed' ? 'state-completed'
+            : (info.status === 'pending_review' ? 'state-suggested' : 'state-planned');
+          dotHtml = '<div class="mc-dot sport-' + info.sport + ' ' + stateClass + '"></div>';
+        }
+        if (info.race) raceHtml = '<div class="mc-race" title="' + info.race.name + '"></div>';
+        onclickAttr = info.race
+          ? ' onclick="goToRaceFromCalendar(new Date(' + d.getFullYear() + ',' + d.getMonth() + ',' + d.getDate() + '))"'
+          : ' onclick="goToDay(\'' + isoDate(d) + '\')"';
+      }
+      cellsHtml += '<div class="' + classes + '"' + onclickAttr + '>' + raceHtml + '<div class="mc-date">' + d.getDate() + '</div>' + dotHtml + '</div>';
+    }
+    grid.innerHTML = headHtml + cellsHtml;
+  }
+
+  function goToDay(isoStr) {
+    focusedDate = new Date(isoStr + 'T00:00:00');
+    setViewMode('week');
+  }
+
+  function goToRaceFromCalendar(d) {
+    var race = raceOnDate(d);
+    showView('races', document.querySelector('.nav-item[data-view="races"]'));
+    toast(race ? ('Jumped to ' + race.name + '.') : 'Jumped to Races.');
+  }
+
+  function setViewMode(mode) {
+    viewMode = mode;
+    document.getElementById('toggleWeekBtn').classList.toggle('active', mode === 'week');
+    document.getElementById('toggleMonthBtn').classList.toggle('active', mode === 'month');
+    document.getElementById('weekViewContainer').style.display = mode === 'week' ? '' : 'none';
+    document.getElementById('monthViewContainer').style.display = mode === 'month' ? '' : 'none';
+    if (mode === 'week') renderManifest(); else renderMonthGrid();
+    updateNavLabel();
+  }
+
+  function stepFocus(dir) {
+    if (viewMode === 'week') focusedDate.setDate(focusedDate.getDate() + dir * 7);
+    else focusedDate.setMonth(focusedDate.getMonth() + dir);
+    if (viewMode === 'week') renderManifest(); else renderMonthGrid();
+    updateNavLabel();
+  }
+
+  function goToday() {
+    focusedDate = new Date(REAL_TODAY);
+    if (viewMode === 'week') renderManifest(); else renderMonthGrid();
+    updateNavLabel();
+  }
+
+  function updateNavLabel() {
+    var label = document.getElementById('planNavLabel');
+    if (viewMode === 'week') {
+      var monday = mondayOf(focusedDate);
+      var sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+      label.textContent = formatShort(monday) + '–' + formatShort(sunday) + ', ' + sunday.getFullYear();
+    } else {
+      label.textContent = monthNames[focusedDate.getMonth()] + ' ' + focusedDate.getFullYear();
+    }
+  }
+
+  function openDayDetail(day) {
+    document.getElementById('dayDetailTitle').textContent = day.dow + ', ' + day.date;
+    var statusInfo = statusLabels[day.status] || statusLabels.planned;
+    document.getElementById('dayDetailBody').innerHTML =
+      '<p style="font-size:12.5px;color:var(--text-muted);margin-top:0;">Past days are read-only — this reflects what was recorded.</p>' +
+      '<div class="stat-row" style="grid-template-columns:repeat(2,1fr);">' +
+        '<div class="stat"><span class="k">Sport</span><span class="v" style="font-family:var(--body);font-size:15px;">' + sportLabels[day.sport] + '</span></div>' +
+        '<div class="stat"><span class="k">Type</span><span class="v" style="font-family:var(--body);font-size:15px;">' + (typeLabels[day.type] || '—') + '</span></div>' +
+        '<div class="stat"><span class="k">Target</span><span class="v">' + targetText(day) + '</span></div>' +
+        '<div class="stat"><span class="k">Status</span><span style="display:block;margin-top:2px;"><span class="pill ' + statusInfo[1] + '">' + statusInfo[0] + '</span></span></div>' +
+      '</div>';
+    openModal('dayDetailBackdrop');
   }
 
   // ---------- Builder modal ----------
   var editingIndex = null;
-  var builderMode = 'plan'; // 'plan' | 'proposed'
-  function openBuilder(i, mode) {
+  var builderMode = 'plan'; // 'plan' | 'proposed' | 'preview'
+  var builderWeekKey = null;
+  function openBuilder(i, mode, weekKey) {
     builderMode = mode || 'plan';
+    builderWeekKey = weekKey || null;
     editingIndex = i;
-    var day = builderMode === 'proposed' ? proposedWeek[i] : week[i];
-    document.getElementById('builderTitle').textContent = builderMode === 'proposed' ? 'Edit proposed workout' : (day.today ? 'Edit today’s workout' : 'Edit workout');
-    document.getElementById('builderDayLabel').textContent = week[i].dow + ', ' + week[i].date;
+    var day = builderMode === 'proposed' ? proposedWeek[i]
+      : builderMode === 'preview' ? previewWeeks[builderWeekKey][i]
+      : week[i];
+    var isToday = isSameDate(day.dateObj, REAL_TODAY);
+    document.getElementById('builderTitle').textContent = builderMode === 'proposed' ? 'Edit proposed workout' : (isToday ? 'Edit today’s workout' : 'Edit workout');
+    document.getElementById('builderDayLabel').textContent = day.dow + ', ' + day.date;
     document.getElementById('builderSport').value = day.sport === 'rest' ? 'rest' : day.sport;
     document.getElementById('builderType').value = day.type || 'easy';
     document.getElementById('builderDuration').value = day.duration || '';
@@ -1134,7 +1437,9 @@
 
   function saveBuilder() {
     if (editingIndex === null) return;
-    var day = builderMode === 'proposed' ? proposedWeek[editingIndex] : week[editingIndex];
+    var day = builderMode === 'proposed' ? proposedWeek[editingIndex]
+      : builderMode === 'preview' ? previewWeeks[builderWeekKey][editingIndex]
+      : week[editingIndex];
     day.sport = document.getElementById('builderSport').value;
     day.type = day.sport === 'rest' ? '' : document.getElementById('builderType').value;
     day.duration = document.getElementById('builderDuration').value ? Number(document.getElementById('builderDuration').value) : null;
@@ -1145,13 +1450,14 @@
     closeModal('builderBackdrop');
     if (builderMode === 'proposed') {
       renderPlanOverview();
-      toast('Proposed workout updated for ' + week[editingIndex].dow + '.');
+      toast('Proposed workout updated for ' + day.dow + '.');
     } else {
       day.status = day.sport === 'rest' ? 'rest' : 'planned';
       renderManifest();
       toast('Workout saved for ' + day.dow + '.');
     }
     builderMode = 'plan';
+    builderWeekKey = null;
   }
 
   // ---------- Suggestion actions ----------
@@ -1238,7 +1544,7 @@
     if (weekReviewState === null) return '';
     if (weekReviewState === 'accepted') {
       return '<div class="panel suggestion-panel"><div class="panel-head"><span class="label" style="color:var(--accent-2);">This week’s plan</span><span class="pill pill-accepted">Accepted</span></div>' +
-        '<div class="panel-body"><p style="margin:0;color:var(--good);font-size:14px;">This week is now on your calendar — check the Weekly plan tab.</p></div></div>';
+        '<div class="panel-body"><p style="margin:0;color:var(--good);font-size:14px;">This week is now on your calendar — check the Plan tab.</p></div></div>';
     }
     if (weekReviewState === 'rejected') {
       return '<div class="panel suggestion-panel"><div class="panel-head"><span class="label" style="color:var(--accent-2);">This week’s plan</span><span class="pill pill-rejected">Kept original</span></div>' +
@@ -1401,13 +1707,15 @@
   function saveRace() {
     var name = document.getElementById('raceName').value.trim() || 'Untitled race';
     var dateInput = document.getElementById('raceDate').value;
-    var dateLabel = dateInput
-      ? new Date(dateInput + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    var dateObj = dateInput ? new Date(dateInput + 'T00:00:00') : null;
+    var dateLabel = dateObj
+      ? dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
       : 'Date TBD';
     races.push({
       id: Date.now(),
       name: name,
       date: dateLabel,
+      dateObj: dateObj,
       countdown: 'New',
       priority: document.getElementById('racePriority').value,
       goalTime: document.getElementById('raceGoalTime').value.trim(),
