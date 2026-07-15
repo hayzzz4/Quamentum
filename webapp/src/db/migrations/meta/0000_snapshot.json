@@ -1,0 +1,1027 @@
+{
+  "id": "f3009f59-6fb6-4d60-986c-07f98333f01a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.activities": {
+      "name": "activities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "strava_activity_id": {
+          "name": "strava_activity_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sport": {
+          "name": "sport",
+          "type": "activity_sport",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration": {
+          "name": "duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance": {
+          "name": "distance",
+          "type": "numeric(7, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avg_hr": {
+          "name": "avg_hr",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avg_pace_or_power": {
+          "name": "avg_pace_or_power",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "relative_effort": {
+          "name": "relative_effort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "raw_payload": {
+          "name": "raw_payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matched_planned_workout_id": {
+          "name": "matched_planned_workout_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "activities_user_id_users_id_fk": {
+          "name": "activities_user_id_users_id_fk",
+          "tableFrom": "activities",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "activities_matched_planned_workout_id_planned_workouts_id_fk": {
+          "name": "activities_matched_planned_workout_id_planned_workouts_id_fk",
+          "tableFrom": "activities",
+          "tableTo": "planned_workouts",
+          "columnsFrom": [
+            "matched_planned_workout_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "activities_strava_activity_id_unique": {
+          "name": "activities_strava_activity_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "strava_activity_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.checkins": {
+      "name": "checkins",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sleep_hours": {
+          "name": "sleep_hours",
+          "type": "numeric(4, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "soreness": {
+          "name": "soreness",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "energy": {
+          "name": "energy",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "checkins_user_date_unique": {
+          "name": "checkins_user_date_unique",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "checkins_user_id_users_id_fk": {
+          "name": "checkins_user_id_users_id_fk",
+          "tableFrom": "checkins",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.insights": {
+      "name": "insights",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activity_id": {
+          "name": "activity_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "commentary": {
+          "name": "commentary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "suggested_workout_id": {
+          "name": "suggested_workout_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "insight_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "insights_user_id_users_id_fk": {
+          "name": "insights_user_id_users_id_fk",
+          "tableFrom": "insights",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "insights_activity_id_activities_id_fk": {
+          "name": "insights_activity_id_activities_id_fk",
+          "tableFrom": "insights",
+          "tableTo": "activities",
+          "columnsFrom": [
+            "activity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "insights_suggested_workout_id_planned_workouts_id_fk": {
+          "name": "insights_suggested_workout_id_planned_workouts_id_fk",
+          "tableFrom": "insights",
+          "tableTo": "planned_workouts",
+          "columnsFrom": [
+            "suggested_workout_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.planned_workouts": {
+      "name": "planned_workouts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sport": {
+          "name": "sport",
+          "type": "workout_sport",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workout_type": {
+          "name": "workout_type",
+          "type": "workout_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_duration_min": {
+          "name": "target_duration_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_distance": {
+          "name": "target_distance",
+          "type": "numeric(7, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_metric": {
+          "name": "target_metric",
+          "type": "target_metric",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_value": {
+          "name": "target_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "workout_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'planned'"
+        },
+        "source": {
+          "name": "source",
+          "type": "workout_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
+        },
+        "superseded_by": {
+          "name": "superseded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "training_block_id": {
+          "name": "training_block_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "race_event_id": {
+          "name": "race_event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "planned_workouts_user_id_users_id_fk": {
+          "name": "planned_workouts_user_id_users_id_fk",
+          "tableFrom": "planned_workouts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "planned_workouts_superseded_by_planned_workouts_id_fk": {
+          "name": "planned_workouts_superseded_by_planned_workouts_id_fk",
+          "tableFrom": "planned_workouts",
+          "tableTo": "planned_workouts",
+          "columnsFrom": [
+            "superseded_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "planned_workouts_training_block_id_training_blocks_id_fk": {
+          "name": "planned_workouts_training_block_id_training_blocks_id_fk",
+          "tableFrom": "planned_workouts",
+          "tableTo": "training_blocks",
+          "columnsFrom": [
+            "training_block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "planned_workouts_race_event_id_race_events_id_fk": {
+          "name": "planned_workouts_race_event_id_race_events_id_fk",
+          "tableFrom": "planned_workouts",
+          "tableTo": "race_events",
+          "columnsFrom": [
+            "race_event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.race_events": {
+      "name": "race_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "priority": {
+          "name": "priority",
+          "type": "race_priority",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_time": {
+          "name": "goal_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "course_notes": {
+          "name": "course_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "race_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'upcoming'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "race_events_user_id_users_id_fk": {
+          "name": "race_events_user_id_users_id_fk",
+          "tableFrom": "race_events",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.race_legs": {
+      "name": "race_legs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "race_event_id": {
+          "name": "race_event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sport": {
+          "name": "sport",
+          "type": "activity_sport",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance": {
+          "name": "distance",
+          "type": "numeric(7, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leg_order": {
+          "name": "leg_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "race_legs_race_event_id_race_events_id_fk": {
+          "name": "race_legs_race_event_id_race_events_id_fk",
+          "tableFrom": "race_legs",
+          "tableTo": "race_events",
+          "columnsFrom": [
+            "race_event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.training_blocks": {
+      "name": "training_blocks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "race_event_id": {
+          "name": "race_event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "week_start_date": {
+          "name": "week_start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phase": {
+          "name": "phase",
+          "type": "training_phase",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_volume": {
+          "name": "target_volume",
+          "type": "numeric(7, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "detail_status": {
+          "name": "detail_status",
+          "type": "detail_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'outline'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "training_blocks_user_id_users_id_fk": {
+          "name": "training_blocks_user_id_users_id_fk",
+          "tableFrom": "training_blocks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "training_blocks_race_event_id_race_events_id_fk": {
+          "name": "training_blocks_race_event_id_race_events_id_fk",
+          "tableFrom": "training_blocks",
+          "tableTo": "race_events",
+          "columnsFrom": [
+            "race_event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "strava_athlete_id": {
+          "name": "strava_athlete_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "connection_status": {
+          "name": "connection_status",
+          "type": "connection_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'connected'"
+        },
+        "weekly_availability": {
+          "name": "weekly_availability",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "experience_level": {
+          "name": "experience_level",
+          "type": "experience_level",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_strava_athlete_id_unique": {
+          "name": "users_strava_athlete_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "strava_athlete_id"
+          ]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.activity_sport": {
+      "name": "activity_sport",
+      "schema": "public",
+      "values": [
+        "run",
+        "trail_run",
+        "ride",
+        "mtb",
+        "swim"
+      ]
+    },
+    "public.connection_status": {
+      "name": "connection_status",
+      "schema": "public",
+      "values": [
+        "connected",
+        "disconnected"
+      ]
+    },
+    "public.detail_status": {
+      "name": "detail_status",
+      "schema": "public",
+      "values": [
+        "outline",
+        "pending_review",
+        "detailed"
+      ]
+    },
+    "public.experience_level": {
+      "name": "experience_level",
+      "schema": "public",
+      "values": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "public.insight_status": {
+      "name": "insight_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "accepted",
+        "edited",
+        "rejected"
+      ]
+    },
+    "public.race_priority": {
+      "name": "race_priority",
+      "schema": "public",
+      "values": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "public.race_status": {
+      "name": "race_status",
+      "schema": "public",
+      "values": [
+        "upcoming",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "public.target_metric": {
+      "name": "target_metric",
+      "schema": "public",
+      "values": [
+        "pace",
+        "power",
+        "hr_zone"
+      ]
+    },
+    "public.training_phase": {
+      "name": "training_phase",
+      "schema": "public",
+      "values": [
+        "base",
+        "build",
+        "peak",
+        "taper",
+        "race_week"
+      ]
+    },
+    "public.workout_source": {
+      "name": "workout_source",
+      "schema": "public",
+      "values": [
+        "user",
+        "ai_suggested"
+      ]
+    },
+    "public.workout_sport": {
+      "name": "workout_sport",
+      "schema": "public",
+      "values": [
+        "run",
+        "trail_run",
+        "ride",
+        "mtb",
+        "swim",
+        "rest"
+      ]
+    },
+    "public.workout_status": {
+      "name": "workout_status",
+      "schema": "public",
+      "values": [
+        "planned",
+        "completed",
+        "skipped",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "superseded"
+      ]
+    },
+    "public.workout_type": {
+      "name": "workout_type",
+      "schema": "public",
+      "values": [
+        "easy",
+        "tempo",
+        "interval",
+        "long",
+        "recovery",
+        "technique",
+        "rest"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
