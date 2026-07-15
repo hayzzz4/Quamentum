@@ -552,8 +552,8 @@
         <div class="panel-body">
           <div class="stat-row">
             <div class="stat"><span class="k">Sport</span><span class="v" style="font-family:var(--body); font-size:15px;">Tempo Run</span></div>
-            <div class="stat"><span class="k">Planned pace</span><span class="v">7:30 <small>/mi</small></span></div>
-            <div class="stat"><span class="k">Actual pace</span><span class="v" style="color:var(--crit);">6:52 <small>/mi</small></span></div>
+            <div class="stat"><span class="k">Planned pace</span><span class="v">4:40 <small>/km</small></span></div>
+            <div class="stat"><span class="k">Actual pace</span><span class="v" style="color:var(--crit);">4:16 <small>/km</small></span></div>
             <div class="stat"><span class="k">Avg HR</span><span class="v">168 <small>bpm · Z4</small></span></div>
           </div>
         </div>
@@ -568,7 +568,7 @@
           </div>
         </div>
         <div class="panel-body">
-          <p class="insight-text">You ran the tempo <span class="metric">38 sec/mi</span> faster than planned and held <span class="metric">Zone 4</span> for most of it &mdash; more like a race effort than a tempo effort. Combined with two short nights this week, that's enough accumulated strain to matter before tomorrow's ride.</p>
+          <p class="insight-text">You ran the tempo <span class="metric">24 sec/km</span> faster than planned and held <span class="metric">Zone 4</span> for most of it &mdash; more like a race effort than a tempo effort. Combined with two short nights this week, that's enough accumulated strain to matter before tomorrow's ride.</p>
         </div>
       </div>
 
@@ -673,7 +673,7 @@
         </div>
         <div class="field">
           <label for="builderDistance">Distance</label>
-          <input type="text" id="builderDistance" placeholder="e.g. 6 mi">
+          <input type="text" id="builderDistance" placeholder="e.g. 10 km">
         </div>
       </div>
       <div class="field-row">
@@ -687,7 +687,7 @@
         </div>
         <div class="field">
           <label for="builderValue">Target value</label>
-          <input type="text" id="builderValue" placeholder="e.g. 7:30/mi">
+          <input type="text" id="builderValue" placeholder="e.g. 4:40/km">
         </div>
       </div>
       <div class="field">
@@ -838,13 +838,13 @@
   };
 
   var week = [
-    { dow:'Mon', date:'Jul 13', sport:'run', type:'tempo', duration:45, distance:'6 mi', metric:'pace', value:'7:30/mi', status:'completed', notes:'' },
+    { dow:'Mon', date:'Jul 13', sport:'run', type:'tempo', duration:45, distance:'10 km', metric:'pace', value:'4:40/km', status:'completed', notes:'' },
     { dow:'Tue', date:'Jul 14', sport:'ride', type:'tempo', duration:60, distance:'', metric:'power', value:'235W', status:'planned', notes:'', today:true },
     { dow:'Wed', date:'Jul 15', sport:'swim', type:'technique', duration:40, distance:'2000 m', metric:'', value:'', status:'planned', notes:'' },
-    { dow:'Thu', date:'Jul 16', sport:'run', type:'interval', duration:50, distance:'', metric:'pace', value:'6x4min @ 5:40/mi', status:'planned', notes:'' },
+    { dow:'Thu', date:'Jul 16', sport:'run', type:'interval', duration:50, distance:'', metric:'pace', value:'6x4min @ 3:30/km', status:'planned', notes:'' },
     { dow:'Fri', date:'Jul 17', sport:'rest', type:'', duration:null, distance:'', metric:'', value:'', status:'rest', notes:'' },
     { dow:'Sat', date:'Jul 18', sport:'mtb', type:'long', duration:150, distance:'', metric:'hr_zone', value:'Z2', status:'planned', notes:'' },
-    { dow:'Sun', date:'Jul 19', sport:'trail_run', type:'long', duration:90, distance:'10 mi', metric:'hr_zone', value:'Z2', status:'planned', notes:'' }
+    { dow:'Sun', date:'Jul 19', sport:'trail_run', type:'long', duration:90, distance:'16 km', metric:'hr_zone', value:'Z2', status:'planned', notes:'' }
   ];
 
   function targetText(day) {
