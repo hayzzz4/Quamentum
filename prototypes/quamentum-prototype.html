@@ -396,6 +396,114 @@
     font-size: 12.5px; color: var(--text-muted);
   }
 
+  /* ---------- Race context (dashboard) ---------- */
+  .race-countdown {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent-2-tint);
+    border: 1px solid var(--accent-2);
+    color: var(--accent-2);
+    border-radius: 100px;
+    padding: 5px 12px 5px 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+  .race-countdown .num {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    background: var(--surface);
+    border-radius: 100px;
+    padding: 2px 9px;
+    font-size: 12px;
+  }
+
+  /* ---------- Races view ---------- */
+  .races-toolbar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+  .race-panel .panel-head { align-items: center; }
+  .race-title-group { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .race-title-group h3 { font-family: var(--display); font-size: 16.5px; font-weight: 600; margin: 0; }
+  .race-title-group .countdown { font-size: 12.5px; color: var(--text-muted); }
+  .priority-pill { font-family: var(--mono); font-weight: 700; font-size: 11px; padding: 2px 7px; border-radius: 3px; }
+  .priority-pill.p-A { background: var(--accent-2); color: var(--bg); }
+  .priority-pill.p-B { background: var(--accent-2-tint); color: var(--accent-2); }
+  .priority-pill.p-C { background: var(--surface-2); color: var(--text-muted); }
+  .race-facts { display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 14px; }
+  .race-facts .stat .v { font-size: 15px; }
+  .race-legs { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .race-leg-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13.5px;
+    padding: 7px 10px;
+    background: var(--surface-2);
+    border-radius: 3px;
+  }
+  .race-leg-row .leg-order {
+    font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+    width: 18px; text-align: center; flex: none;
+  }
+  .race-notes {
+    font-size: 13.5px; color: var(--text-muted);
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+    margin-bottom: 14px;
+  }
+  .race-slot-note {
+    font-size: 13px; color: var(--accent-2);
+    background: var(--accent-2-tint);
+    border-radius: 3px;
+    padding: 9px 12px;
+    margin-bottom: 4px;
+  }
+
+  /* ---------- Leg builder (Add race modal) ---------- */
+  .leg-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+  .leg-edit-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
+  .leg-remove {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    border-radius: 3px; width: 34px; height: 34px; cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .leg-remove:hover { border-color: var(--crit); color: var(--crit); }
+  .add-leg-btn { align-self: flex-start; margin-top: 2px; }
+
+  /* ---------- Phase timeline ---------- */
+  .phase-timeline { display: flex; gap: 6px; margin-bottom: 4px; overflow-x: auto; }
+  .phase-block {
+    flex: 1 0 90px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+  }
+  .phase-block .phase-name {
+    font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 4px;
+  }
+  .phase-block .phase-weeks { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .phase-block .phase-volume { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; }
+  .phase-block.is-current {
+    background: var(--accent-2-tint);
+    border-color: var(--accent-2);
+  }
+  .phase-block.is-current .phase-name { color: var(--accent-2); }
+  .phase-block.is-current::after {
+    content: "You are here";
+    display: block; font-size: 10.5px; color: var(--accent-2); margin-top: 6px; font-weight: 600;
+  }
+  .phase-block.is-race .phase-volume { color: var(--accent-2); }
+
+  /* ---------- Conflict checklist ---------- */
+  .conflict-list { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 6px; }
+  .conflict-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  .conflict-row:last-child { border-bottom: none; }
+  .conflict-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--crit); }
+  .conflict-row .cday { font-weight: 600; width: 42px; flex: none; }
+  .conflict-row .cwas { color: var(--text-muted); }
+
   /* ---------- Modal ---------- */
   .modal-backdrop {
     display: none;
@@ -520,6 +628,9 @@
       <button class="nav-item" data-view="plan" onclick="showView('plan', this)">
         <span class="nav-dot"></span> Weekly plan
       </button>
+      <button class="nav-item" data-view="races" onclick="showView('races', this)">
+        <span class="nav-dot"></span> Races
+      </button>
     </div>
     <div class="rail-footer">
       <strong>Jordan Reyes</strong>
@@ -537,6 +648,7 @@
         <p class="eyebrow">Tuesday, July 14</p>
         <h1>Today's read</h1>
         <p class="sub">Yesterday's tempo run came in hotter than planned. Here's what that changes for tomorrow.</p>
+        <div class="race-countdown" id="dashRaceCountdown"></div>
       </div>
 
       <div class="checkin-nudge" id="checkinNudge">
@@ -629,6 +741,22 @@
           <span id="weekSummary"></span>
         </div>
       </div>
+    </section>
+
+    <!-- ---------- RACES VIEW ---------- -->
+    <section class="view" id="view-races">
+      <div class="view-header">
+        <p class="eyebrow">Race planning</p>
+        <h1>Upcoming races</h1>
+        <p class="sub">Add a race and generate a periodized plan leading up to it. Your highest-priority race drives the build; tune-up races slot in around it.</p>
+      </div>
+
+      <div class="races-toolbar">
+        <button class="btn btn-outline" onclick="openAddRace()">+ Add race</button>
+      </div>
+
+      <div id="racesList"></div>
+      <div id="planOverviewContainer"></div>
     </section>
   </main>
 </div>
@@ -734,6 +862,73 @@
   </div>
 </div>
 
+<!-- ============ ADD RACE MODAL ============ -->
+<div class="modal-backdrop" id="addRaceBackdrop" role="dialog" aria-modal="true" aria-labelledby="addRaceTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="addRaceTitle">Add a race</h2>
+      <button class="modal-close" aria-label="Close" onclick="closeModal('addRaceBackdrop')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="raceName">Race name</label>
+        <input type="text" id="raceName" placeholder="e.g. Coastal Half Marathon">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="raceDate">Date</label>
+          <input type="date" id="raceDate">
+        </div>
+        <div class="field">
+          <label for="racePriority">Priority</label>
+          <select id="racePriority">
+            <option value="A">A &mdash; main goal race</option>
+            <option value="B">B &mdash; tune-up race</option>
+            <option value="C">C &mdash; low-key / fun race</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Legs</label>
+        <div class="leg-list" id="legList"></div>
+        <button type="button" class="btn btn-outline btn-small add-leg-btn" onclick="addLegDraft()">+ Add another leg (duathlon / triathlon)</button>
+      </div>
+
+      <div class="field">
+        <label for="raceGoalTime">Goal time (optional)</label>
+        <input type="text" id="raceGoalTime" placeholder="e.g. 1:45:00">
+      </div>
+      <div class="field">
+        <label for="raceCourseNotes">Course notes (optional)</label>
+        <textarea id="raceCourseNotes" placeholder="e.g. hilly, technical singletrack"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('addRaceBackdrop')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRace()">Save race</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONFIRM GENERATE PLAN MODAL ============ -->
+<div class="modal-backdrop" id="confirmPlanBackdrop" role="dialog" aria-modal="true" aria-labelledby="confirmPlanTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="confirmPlanTitle">Generate training plan</h2>
+      <button class="modal-close" aria-label="Close" onclick="closeModal('confirmPlanBackdrop')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="conflictSummaryText" style="font-size:13.5px;color:var(--text-muted);margin-top:0;"></p>
+      <div class="conflict-list" id="conflictList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('confirmPlanBackdrop')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmGeneratePlan()">Confirm &amp; generate</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -809,6 +1004,7 @@
     shell.classList.add('active');
     drawPulse();
     renderManifest();
+    renderRaces();
     toast('Connected — pulled in your last 14 days from Strava.');
   }
 
@@ -847,6 +1043,47 @@
     { dow:'Sun', date:'Jul 19', sport:'trail_run', type:'long', duration:90, distance:'16 km', metric:'hr_zone', value:'Z2', status:'planned', notes:'' }
   ];
 
+  // ---------- Race planning data ----------
+  var races = [
+    {
+      id: 1, name: 'Coastal Half Marathon', date: 'Oct 4, 2026', countdown: '12 weeks away',
+      priority: 'A', goalTime: '1:45:00',
+      courseNotes: 'Flat coastal road course, occasional headwind on the return leg.',
+      legs: [{ sport: 'run', distance: '21.1 km' }],
+      status: 'upcoming', planGenerated: false
+    },
+    {
+      id: 2, name: 'Riverside 5K Tune-up', date: 'Aug 25, 2026', countdown: '6 weeks away',
+      priority: 'B', goalTime: '',
+      courseNotes: '',
+      legs: [{ sport: 'run', distance: '5 km' }],
+      status: 'upcoming', planGenerated: false
+    }
+  ];
+
+  var phases = [
+    { name: 'Base', weeks: 'Wk 1–4', volume: '~5 hrs', current: true },
+    { name: 'Build', weeks: 'Wk 5–8', volume: '~7 hrs' },
+    { name: 'Peak', weeks: 'Wk 9–10', volume: '~9 hrs' },
+    { name: 'Taper', weeks: 'Wk 11', volume: '~5 hrs' },
+    { name: 'Race week', weeks: 'Wk 12', volume: 'Race day', isRace: true }
+  ];
+
+  var raceWeekTemplate = {
+    1: { sport: 'run', type: 'easy', duration: 40, distance: '', metric: 'pace', value: '5:45/km' },
+    2: { sport: 'swim', type: 'technique', duration: 40, distance: '2000 m', metric: '', value: '' },
+    3: { sport: 'run', type: 'interval', duration: 50, distance: '', metric: 'pace', value: '6x3min @ 3:35/km' },
+    5: { sport: 'ride', type: 'long', duration: 90, distance: '', metric: 'hr_zone', value: 'Z2' },
+    6: { sport: 'run', type: 'long', duration: 70, distance: '11 km', metric: 'hr_zone', value: 'Z2' }
+  };
+
+  var legDraft = [];
+  var pendingRaceId = null;
+  var pendingConflictIndices = [];
+  var proposedIndices = [];
+  var proposedWeek = {};
+  var weekReviewState = null; // null | 'pending' | 'accepted' | 'rejected'
+
   function targetText(day) {
     if (day.sport === 'rest') return '—';
     var bits = [];
@@ -878,11 +1115,13 @@
 
   // ---------- Builder modal ----------
   var editingIndex = null;
-  function openBuilder(i) {
+  var builderMode = 'plan'; // 'plan' | 'proposed'
+  function openBuilder(i, mode) {
+    builderMode = mode || 'plan';
     editingIndex = i;
-    var day = week[i];
-    document.getElementById('builderTitle').textContent = day.today ? 'Edit today’s workout' : 'Edit workout';
-    document.getElementById('builderDayLabel').textContent = day.dow + ', ' + day.date;
+    var day = builderMode === 'proposed' ? proposedWeek[i] : week[i];
+    document.getElementById('builderTitle').textContent = builderMode === 'proposed' ? 'Edit proposed workout' : (day.today ? 'Edit today’s workout' : 'Edit workout');
+    document.getElementById('builderDayLabel').textContent = week[i].dow + ', ' + week[i].date;
     document.getElementById('builderSport').value = day.sport === 'rest' ? 'rest' : day.sport;
     document.getElementById('builderType').value = day.type || 'easy';
     document.getElementById('builderDuration').value = day.duration || '';
@@ -895,7 +1134,7 @@
 
   function saveBuilder() {
     if (editingIndex === null) return;
-    var day = week[editingIndex];
+    var day = builderMode === 'proposed' ? proposedWeek[editingIndex] : week[editingIndex];
     day.sport = document.getElementById('builderSport').value;
     day.type = day.sport === 'rest' ? '' : document.getElementById('builderType').value;
     day.duration = document.getElementById('builderDuration').value ? Number(document.getElementById('builderDuration').value) : null;
@@ -903,10 +1142,16 @@
     day.metric = document.getElementById('builderMetric').value;
     day.value = document.getElementById('builderValue').value;
     day.notes = document.getElementById('builderNotes').value;
-    day.status = day.sport === 'rest' ? 'rest' : 'planned';
     closeModal('builderBackdrop');
-    renderManifest();
-    toast('Workout saved for ' + day.dow + '.');
+    if (builderMode === 'proposed') {
+      renderPlanOverview();
+      toast('Proposed workout updated for ' + week[editingIndex].dow + '.');
+    } else {
+      day.status = day.sport === 'rest' ? 'rest' : 'planned';
+      renderManifest();
+      toast('Workout saved for ' + day.dow + '.');
+    }
+    builderMode = 'plan';
   }
 
   // ---------- Suggestion actions ----------
@@ -942,6 +1187,238 @@
     panel.querySelector('.pill').className = 'pill pill-rejected';
     panel.querySelector('.pill').textContent = 'Kept original';
     toast('Original plan kept for tomorrow.');
+  }
+
+  // ---------- Races ----------
+  function raceCardHtml(race) {
+    var legsHtml = race.legs.map(function(leg, i){
+      return '<div class="race-leg-row"><span class="leg-order">' + (i + 1) + '</span>' +
+        '<span class="sport-tag sport-' + leg.sport + '"><span class="sport-dot"></span>' + sportLabels[leg.sport] + '</span>' +
+        '<span class="target-cell">' + leg.distance + '</span></div>';
+    }).join('');
+
+    var factsHtml = '<div class="race-facts">' +
+      '<div class="stat"><span class="k">Date</span><span class="v" style="font-family:var(--body);font-size:15px;">' + race.date + '</span></div>' +
+      (race.goalTime ? '<div class="stat"><span class="k">Goal time</span><span class="v">' + race.goalTime + '</span></div>' : '') +
+      '</div>';
+
+    var notesHtml = race.courseNotes ? '<p class="race-notes">' + race.courseNotes + '</p>' : '';
+
+    var actionHtml;
+    if (race.priority === 'A') {
+      actionHtml = '<div class="action-row">' +
+        (race.planGenerated
+          ? '<span class="pill pill-accepted">Plan active</span>'
+          : '<button class="btn btn-primary" onclick="openGeneratePlan(' + race.id + ')">Generate training plan</button>') +
+        '<button class="btn btn-ghost" onclick="removeRace(' + race.id + ')">Remove</button></div>';
+    } else {
+      var driving = races.find(function(r){ return r.priority === 'A'; });
+      var slotNote = driving
+        ? '<p class="race-slot-note">Slotted into your ' + driving.name + ' build automatically once that week is detailed — no separate plan needed.</p>'
+        : '';
+      actionHtml = slotNote + '<div class="action-row"><button class="btn btn-ghost" onclick="removeRace(' + race.id + ')">Remove</button></div>';
+    }
+
+    return '<div class="panel race-panel">' +
+      '<div class="panel-head">' +
+        '<div class="race-title-group"><h3>' + race.name + '</h3><span class="countdown">' + race.countdown + '</span></div>' +
+        '<span class="priority-pill p-' + race.priority + '">' + race.priority + '-race</span>' +
+      '</div>' +
+      '<div class="panel-body">' + factsHtml + '<div class="race-legs">' + legsHtml + '</div>' + notesHtml + actionHtml + '</div>' +
+    '</div>';
+  }
+
+  function renderRaces() {
+    document.getElementById('racesList').innerHTML = races.map(raceCardHtml).join('');
+    renderPlanOverview();
+    updateDashboardRaceCountdown();
+  }
+
+  function renderProposedWeekHtml() {
+    if (weekReviewState === null) return '';
+    if (weekReviewState === 'accepted') {
+      return '<div class="panel suggestion-panel"><div class="panel-head"><span class="label" style="color:var(--accent-2);">This week’s plan</span><span class="pill pill-accepted">Accepted</span></div>' +
+        '<div class="panel-body"><p style="margin:0;color:var(--good);font-size:14px;">This week is now on your calendar — check the Weekly plan tab.</p></div></div>';
+    }
+    if (weekReviewState === 'rejected') {
+      return '<div class="panel suggestion-panel"><div class="panel-head"><span class="label" style="color:var(--accent-2);">This week’s plan</span><span class="pill pill-rejected">Kept original</span></div>' +
+        '<div class="panel-body"><p style="margin:0;color:var(--text-muted);font-size:14px;">Kept your existing plan for this week.</p></div></div>';
+    }
+    var rows = proposedIndices.map(function(idx){
+      var day = proposedWeek[idx];
+      return '<tr onclick="openBuilder(' + idx + ', \'proposed\')">' +
+        '<td class="day-col"><span class="dow">' + week[idx].dow + '</span><br><span class="date">' + week[idx].date + '</span></td>' +
+        '<td><span class="sport-tag sport-' + day.sport + '"><span class="sport-dot"></span>' + sportLabels[day.sport] + '</span></td>' +
+        '<td>' + (typeLabels[day.type] || '—') + '</td>' +
+        '<td class="target-cell">' + targetText(day) + '</td>' +
+      '</tr>';
+    }).join('');
+
+    return '<div class="panel suggestion-panel"><div class="panel-head"><span class="label" style="color:var(--accent-2);">This week’s proposed plan · Base phase</span><span class="pill pill-suggested">Awaiting review</span></div>' +
+      '<div class="panel-body">' +
+      '<div style="overflow-x:auto;"><table class="manifest"><thead><tr><th>Day</th><th>Sport</th><th>Type</th><th>Target</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p style="font-size:12.5px;color:var(--text-muted);margin:12px 0 16px;">Click any day to adjust it before accepting.</p>' +
+      '<div class="action-row"><button class="btn btn-primary" onclick="acceptProposedWeek()">Accept week</button><button class="btn btn-ghost" onclick="rejectProposedWeek()">Keep original plan</button></div>' +
+      '</div></div>';
+  }
+
+  function renderPlanOverview() {
+    var el = document.getElementById('planOverviewContainer');
+    var driving = races.find(function(r){ return r.priority === 'A' && r.planGenerated; });
+    if (!driving) { el.innerHTML = ''; return; }
+
+    var timelineHtml = phases.map(function(p){
+      var cls = 'phase-block' + (p.current ? ' is-current' : '') + (p.isRace ? ' is-race' : '');
+      return '<div class="' + cls + '"><div class="phase-name">' + p.name + '</div><div class="phase-weeks">' + p.weeks + '</div><div class="phase-volume">' + p.volume + '</div></div>';
+    }).join('');
+
+    var tuneup = races.find(function(r){ return r.priority !== 'A'; });
+    var slotNote = tuneup
+      ? '<p class="race-slot-note">Your ' + tuneup.name + ' (' + tuneup.date + ') will be slotted into Week 6 as a race-effort day once that week is detailed.</p>'
+      : '';
+
+    var overviewHtml = '<div class="panel"><div class="panel-head"><span class="label">Training plan overview · ' + driving.name + '</span></div>' +
+      '<div class="panel-body"><div class="phase-timeline">' + timelineHtml + '</div>' + slotNote + '</div></div>';
+
+    el.innerHTML = overviewHtml + renderProposedWeekHtml();
+  }
+
+  function updateDashboardRaceCountdown() {
+    var el = document.getElementById('dashRaceCountdown');
+    var driving = races.find(function(r){ return r.priority === 'A'; });
+    if (!driving) { el.style.display = 'none'; return; }
+    var phase = phases.find(function(p){ return p.current; });
+    el.innerHTML = driving.countdown + ' to ' + driving.name +
+      (driving.planGenerated
+        ? ' <span class="num">' + (phase ? phase.name + ' · Week 1' : '') + '</span>'
+        : ' <span class="num">No plan yet</span>');
+  }
+
+  function openGeneratePlan(raceId) {
+    pendingRaceId = raceId;
+    var indices = [];
+    week.forEach(function(day, i){
+      if (day.sport !== 'rest' && day.status !== 'completed') indices.push(i);
+    });
+    pendingConflictIndices = indices;
+    var rows = indices.map(function(i){
+      var day = week[i];
+      return '<div class="conflict-row"><input type="checkbox" checked id="conf' + i + '">' +
+        '<label for="conf' + i + '" class="cday">' + day.dow + '</label>' +
+        '<span class="cwas">' + sportLabels[day.sport] + ' · ' + targetText(day) + '</span></div>';
+    }).join('');
+    document.getElementById('conflictSummaryText').textContent =
+      'Generating this plan will replace ' + indices.length + ' planned workout' + (indices.length === 1 ? '' : 's') +
+      ' this week. Uncheck any you’d like to keep as-is.';
+    document.getElementById('conflictList').innerHTML = rows;
+    openModal('confirmPlanBackdrop');
+  }
+
+  function confirmGeneratePlan() {
+    var checked = pendingConflictIndices.filter(function(i){
+      var cb = document.getElementById('conf' + i);
+      return cb && cb.checked;
+    });
+    proposedIndices = checked;
+    proposedWeek = {};
+    checked.forEach(function(i){
+      var tmpl = raceWeekTemplate[i];
+      if (tmpl) proposedWeek[i] = Object.assign({}, week[i], tmpl);
+    });
+    weekReviewState = 'pending';
+    var race = races.find(function(r){ return r.id === pendingRaceId; });
+    if (race) race.planGenerated = true;
+    closeModal('confirmPlanBackdrop');
+    renderRaces();
+    toast('Generated Week 1 of your ' + (race ? race.name : 'plan') + '.');
+  }
+
+  function acceptProposedWeek() {
+    proposedIndices.forEach(function(i){
+      var p = proposedWeek[i];
+      week[i].sport = p.sport;
+      week[i].type = p.type;
+      week[i].duration = p.duration;
+      week[i].distance = p.distance;
+      week[i].metric = p.metric;
+      week[i].value = p.value;
+      week[i].status = 'accepted';
+    });
+    weekReviewState = 'accepted';
+    renderManifest();
+    renderPlanOverview();
+    var race = races.find(function(r){ return r.priority === 'A'; });
+    toast('Week 1 accepted — your ' + (race ? race.name : 'race') + ' plan is now on the calendar.');
+  }
+
+  function rejectProposedWeek() {
+    weekReviewState = 'rejected';
+    renderPlanOverview();
+    toast('Kept your existing plan for this week.');
+  }
+
+  function removeRace(id) {
+    races = races.filter(function(r){ return r.id !== id; });
+    renderRaces();
+    toast('Race removed.');
+  }
+
+  function openAddRace() {
+    document.getElementById('raceName').value = '';
+    document.getElementById('raceDate').value = '';
+    document.getElementById('racePriority').value = 'A';
+    document.getElementById('raceGoalTime').value = '';
+    document.getElementById('raceCourseNotes').value = '';
+    legDraft = [{ sport: 'run', distance: '' }];
+    renderLegDraft();
+    openModal('addRaceBackdrop');
+  }
+
+  function renderLegDraft() {
+    var wrap = document.getElementById('legList');
+    wrap.innerHTML = legDraft.map(function(leg, i){
+      var options = ['run', 'trail_run', 'ride', 'mtb', 'swim'].map(function(s){
+        return '<option value="' + s + '"' + (leg.sport === s ? ' selected' : '') + '>' + sportLabels[s] + '</option>';
+      }).join('');
+      return '<div class="leg-edit-row">' +
+        '<select onchange="legDraft[' + i + '].sport=this.value">' + options + '</select>' +
+        '<input type="text" placeholder="Distance, e.g. 21.1 km" value="' + leg.distance + '" oninput="legDraft[' + i + '].distance=this.value">' +
+        (legDraft.length > 1 ? '<button type="button" class="leg-remove" onclick="removeLegDraft(' + i + ')" aria-label="Remove leg">&times;</button>' : '<span></span>') +
+      '</div>';
+    }).join('');
+  }
+
+  function addLegDraft() {
+    legDraft.push({ sport: 'run', distance: '' });
+    renderLegDraft();
+  }
+
+  function removeLegDraft(i) {
+    legDraft.splice(i, 1);
+    renderLegDraft();
+  }
+
+  function saveRace() {
+    var name = document.getElementById('raceName').value.trim() || 'Untitled race';
+    var dateInput = document.getElementById('raceDate').value;
+    var dateLabel = dateInput
+      ? new Date(dateInput + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Date TBD';
+    races.push({
+      id: Date.now(),
+      name: name,
+      date: dateLabel,
+      countdown: 'New',
+      priority: document.getElementById('racePriority').value,
+      goalTime: document.getElementById('raceGoalTime').value.trim(),
+      courseNotes: document.getElementById('raceCourseNotes').value.trim(),
+      legs: legDraft.map(function(l){ return { sport: l.sport, distance: l.distance || '—' }; }),
+      status: 'upcoming',
+      planGenerated: false
+    });
+    closeModal('addRaceBackdrop');
+    renderRaces();
+    toast('Race added.');
   }
 
   // ---------- Check-in ----------
