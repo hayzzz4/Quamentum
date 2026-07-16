@@ -14,7 +14,7 @@ export async function proxy(request: NextRequest) {
     : null;
 
   if (!session?.userId) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    return NextResponse.redirect(new URL('/sign-in', request.url), 303);
   }
 
   return NextResponse.next();
