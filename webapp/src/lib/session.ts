@@ -6,6 +6,9 @@ export interface SessionData {
 }
 
 export const SESSION_COOKIE_NAME = 'quamentum_session';
+export const STATE_COOKIE_NAME = 'strava_oauth_state';
+
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 function sessionPassword(): string {
   const password = process.env.SESSION_SECRET;
@@ -16,7 +19,7 @@ function sessionPassword(): string {
 }
 
 export async function createSessionCookieValue(data: SessionData): Promise<string> {
-  return sealData(data, { password: sessionPassword() });
+  return sealData(data, { password: sessionPassword(), ttl: SESSION_MAX_AGE_SECONDS });
 }
 
 export async function readSessionCookieValue(value: string): Promise<SessionData | null> {
@@ -45,7 +48,7 @@ export async function setSessionCookie(data: SessionData): Promise<void> {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }
 

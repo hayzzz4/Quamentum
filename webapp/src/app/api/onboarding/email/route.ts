@@ -17,5 +17,5 @@ export async function POST(request: NextRequest) {
   }
 
   await db.update(users).set({ email, updatedAt: new Date() }).where(eq(users.id, userId));
-  return NextResponse.redirect(new URL('/', request.url));
+  return NextResponse.redirect(new URL('/', request.url), 303);
 }

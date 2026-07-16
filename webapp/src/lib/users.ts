@@ -50,6 +50,7 @@ export async function upsertUserFromStrava(athlete: StravaAthleteInfo, tokens: S
       target: users.stravaAthleteId,
       set: {
         name,
+        timezone: parseIanaTimezone(athlete.timezone),
         accessToken: encryptedAccessToken,
         refreshToken: encryptedRefreshToken,
         expiresAt: tokens.expiresAt,
