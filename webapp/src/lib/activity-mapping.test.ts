@@ -37,6 +37,11 @@ describe('mapStravaActivityToRow', () => {
     expect(row.avgPaceOrPower).toBe('6:00/km');
   });
 
+  it('carries a rounded-to-60 seconds value into the next minute', () => {
+    const row = mapStravaActivityToRow(baseActivity({ average_speed: 8.3682008 }), 'user-1');
+    expect(row.avgPaceOrPower).toBe('2:00/km');
+  });
+
   it('formats power in watts for ride/mtb', () => {
     const row = mapStravaActivityToRow(
       baseActivity({ sport_type: 'Ride', average_watts: 187.4 }),
