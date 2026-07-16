@@ -4,7 +4,14 @@ import { randomBytes } from 'node:crypto';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
 import { truncateAllTables } from '@/test/db-helpers';
-import { upsertUserFromStrava } from './users';
+import {
+  upsertUserFromStrava,
+  findUserByStravaAthleteId,
+  getConnectedUsers,
+  decryptUserTokens,
+  updateUserTokens,
+  markUserDisconnected,
+} from './users';
 import { decrypt } from './crypto';
 
 describe('upsertUserFromStrava', () => {
@@ -46,5 +53,94 @@ describe('upsertUserFromStrava', () => {
 
     const key = Buffer.from(process.env.TOKEN_ENCRYPTION_KEY!, 'hex');
     expect(decrypt(all[0].accessToken, key)).toBe('access-2');
+  });
+});
+
+describe('findUserByStravaAthleteId', () => {
+  beforeEach(async () => {
+    await truncateAllTables();
+  });
+
+  it('finds a user by their Strava athlete id', async () => {
+    const created = await upsertUserFromStrava(
+      { id: 4242, firstname: 'Ada', lastname: 'Lovelace', timezone: null },
+      { accessToken: 'a', refreshToken: 'r', expiresAt: new Date() },
+    );
+
+    const found = await findUserByStravaAthleteId(4242);
+    expect(found?.id).toBe(created.id);
+  });
+
+  it('returns null when no user matches', async () => {
+    expect(await findUserByStravaAthleteId(999999)).toBeNull();
+  });
+});
+
+describe('getConnectedUsers', () => {
+  beforeEach(async () => {
+    await truncateAllTables();
+  });
+
+  it('returns only users with connection_status="connected"', async () => {
+    const connected = await upsertUserFromStrava(
+      { id: 1, firstname: 'Connected', lastname: 'User', timezone: null },
+      { accessToken: 'a', refreshToken: 'r', expiresAt: new Date() },
+    );
+    const disconnected = await upsertUserFromStrava(
+      { id: 2, firstname: 'Disconnected', lastname: 'User', timezone: null },
+      { accessToken: 'a', refreshToken: 'r', expiresAt: new Date() },
+    );
+    await markUserDisconnected(disconnected.id);
+
+    const result = await getConnectedUsers();
+    expect(result.map((u) => u.id)).toEqual([connected.id]);
+  });
+});
+
+describe('decryptUserTokens / updateUserTokens', () => {
+  beforeEach(async () => {
+    await truncateAllTables();
+  });
+
+  it('round-trips tokens through encrypt/decrypt', async () => {
+    const user = await upsertUserFromStrava(
+      { id: 3, firstname: 'Grace', lastname: 'Hopper', timezone: null },
+      { accessToken: 'original-access', refreshToken: 'original-refresh', expiresAt: new Date() },
+    );
+
+    expect(decryptUserTokens(user)).toEqual({
+      accessToken: 'original-access',
+      refreshToken: 'original-refresh',
+    });
+
+    await updateUserTokens(user.id, {
+      accessToken: 'new-access',
+      refreshToken: 'new-refresh',
+      expiresAt: new Date('2027-01-01T00:00:00Z'),
+    });
+
+    const refreshed = await findUserByStravaAthleteId(3);
+    expect(decryptUserTokens(refreshed!)).toEqual({
+      accessToken: 'new-access',
+      refreshToken: 'new-refresh',
+    });
+  });
+});
+
+describe('markUserDisconnected', () => {
+  beforeEach(async () => {
+    await truncateAllTables();
+  });
+
+  it('sets connection_status to disconnected', async () => {
+    const user = await upsertUserFromStrava(
+      { id: 5, firstname: 'Test', lastname: 'User', timezone: null },
+      { accessToken: 'a', refreshToken: 'r', expiresAt: new Date() },
+    );
+
+    await markUserDisconnected(user.id);
+
+    const found = await findUserByStravaAthleteId(5);
+    expect(found?.connectionStatus).toBe('disconnected');
   });
 });

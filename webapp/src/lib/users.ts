@@ -1,6 +1,7 @@
+import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { users } from '@/db/schema';
-import { encrypt } from './crypto';
+import { users, type User } from '@/db/schema';
+import { encrypt, decrypt } from './crypto';
 
 export interface StravaAthleteInfo {
   id: number;
@@ -61,4 +62,43 @@ export async function upsertUserFromStrava(athlete: StravaAthleteInfo, tokens: S
     .returning();
 
   return user;
+}
+
+export async function findUserByStravaAthleteId(stravaAthleteId: number): Promise<User | null> {
+  const [user] = await db.select().from(users).where(eq(users.stravaAthleteId, stravaAthleteId));
+  return user ?? null;
+}
+
+export async function getConnectedUsers(): Promise<User[]> {
+  return db.select().from(users).where(eq(users.connectionStatus, 'connected'));
+}
+
+export function decryptUserTokens(
+  user: Pick<User, 'accessToken' | 'refreshToken'>,
+): { accessToken: string; refreshToken: string } {
+  const key = encryptionKey();
+  return {
+    accessToken: decrypt(user.accessToken, key),
+    refreshToken: decrypt(user.refreshToken, key),
+  };
+}
+
+export async function updateUserTokens(userId: string, tokens: StravaTokenSet): Promise<void> {
+  const key = encryptionKey();
+  await db
+    .update(users)
+    .set({
+      accessToken: encrypt(tokens.accessToken, key),
+      refreshToken: encrypt(tokens.refreshToken, key),
+      expiresAt: tokens.expiresAt,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+}
+
+export async function markUserDisconnected(userId: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ connectionStatus: 'disconnected', updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }
