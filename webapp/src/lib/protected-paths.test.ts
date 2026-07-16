@@ -23,4 +23,12 @@ describe('isProtectedPath', () => {
     expect(isProtectedPath('/_next/static/chunk.js')).toBe(false);
     expect(isProtectedPath('/favicon.ico')).toBe(false);
   });
+
+  it('does not protect the Strava webhook route', () => {
+    expect(isProtectedPath('/api/strava/webhook')).toBe(false);
+  });
+
+  it('does not protect cron routes', () => {
+    expect(isProtectedPath('/api/cron/reconcile-activities')).toBe(false);
+  });
 });
