@@ -52,3 +52,58 @@ export function exchangeCodeForToken(code: string): Promise<StravaTokenResponse>
 export function refreshStravaToken(refreshToken: string): Promise<StravaTokenResponse> {
   return postToStrava({ refresh_token: refreshToken, grant_type: 'refresh_token' });
 }
+
+const STRAVA_API_BASE = 'https://www.strava.com/api/v3';
+
+export class StravaApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'StravaApiError';
+  }
+}
+
+export interface StravaActivity {
+  id: number;
+  sport_type: string;
+  start_date_local: string;
+  moving_time: number;
+  distance: number;
+  average_heartrate?: number;
+  average_speed: number;
+  average_watts?: number;
+  suffer_score?: number | null;
+}
+
+export async function fetchStravaActivity(accessToken: string, activityId: number): Promise<StravaActivity> {
+  const response = await fetch(`${STRAVA_API_BASE}/activities/${activityId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new StravaApiError(response.status, `Strava activity endpoint responded with ${response.status}`);
+  }
+  return response.json();
+}
+
+export interface StravaActivitySummary {
+  id: number;
+}
+
+export async function fetchStravaActivities(
+  accessToken: string,
+  afterEpochSeconds: number,
+): Promise<StravaActivitySummary[]> {
+  const url = new URL(`${STRAVA_API_BASE}/athlete/activities`);
+  url.searchParams.set('after', String(afterEpochSeconds));
+  url.searchParams.set('per_page', '100');
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new StravaApiError(response.status, `Strava activities endpoint responded with ${response.status}`);
+  }
+  return response.json();
+}
