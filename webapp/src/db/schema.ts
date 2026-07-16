@@ -16,7 +16,7 @@ import {
 export const connectionStatusEnum = pgEnum('connection_status', ['connected', 'disconnected']);
 export const experienceLevelEnum = pgEnum('experience_level', ['beginner', 'intermediate', 'advanced']);
 export const workoutSportEnum = pgEnum('workout_sport', ['run', 'trail_run', 'ride', 'mtb', 'swim', 'rest']);
-export const activitySportEnum = pgEnum('activity_sport', ['run', 'trail_run', 'ride', 'mtb', 'swim']);
+export const activitySportEnum = pgEnum('activity_sport', ['run', 'trail_run', 'ride', 'mtb', 'swim', 'other']);
 export const workoutTypeEnum = pgEnum('workout_type', [
   'easy', 'tempo', 'interval', 'long', 'recovery', 'technique', 'rest',
 ]);
@@ -145,3 +145,9 @@ export const insights = pgTable('insights', {
   status: insightStatusEnum('status').notNull().default('pending'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export type User = typeof users.$inferSelect;
+export type Activity = typeof activities.$inferSelect;
+export type NewActivity = typeof activities.$inferInsert;
+export type PlannedWorkout = typeof plannedWorkouts.$inferSelect;
+export type ActivitySport = (typeof activitySportEnum.enumValues)[number];

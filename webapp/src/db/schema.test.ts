@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { users } from '@/db/schema';
+import { activities, users } from '@/db/schema';
 import { truncateAllTables } from '@/test/db-helpers';
 
 describe('schema: users table', () => {
@@ -38,5 +38,39 @@ describe('schema: users table', () => {
     };
     await db.insert(users).values(values);
     await expect(db.insert(users).values(values)).rejects.toThrow();
+  });
+});
+
+describe('schema: activities table', () => {
+  beforeEach(async () => {
+    await truncateAllTables();
+  });
+
+  it('accepts sport="other" for activity types outside the five supported sports', async () => {
+    const [user] = await db
+      .insert(users)
+      .values({
+        stravaAthleteId: 777,
+        name: 'Test Athlete',
+        timezone: 'UTC',
+        accessToken: 'enc-access',
+        refreshToken: 'enc-refresh',
+        expiresAt: new Date(),
+      })
+      .returning();
+
+    const [inserted] = await db
+      .insert(activities)
+      .values({
+        userId: user.id,
+        stravaActivityId: 1001,
+        date: new Date('2026-07-10'),
+        sport: 'other',
+        duration: 1800,
+        rawPayload: { type: 'WeightTraining' },
+      })
+      .returning();
+
+    expect(inserted.sport).toBe('other');
   });
 });

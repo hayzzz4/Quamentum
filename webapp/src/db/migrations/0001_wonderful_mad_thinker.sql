@@ -1,0 +1,1 @@
+ALTER TYPE "public"."activity_sport" ADD VALUE 'other';
