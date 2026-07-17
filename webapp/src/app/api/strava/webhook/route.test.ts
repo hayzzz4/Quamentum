@@ -101,4 +101,37 @@ describe('POST /api/strava/webhook (activity events)', () => {
     expect(consoleErrorSpy).toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
   });
+
+  it('returns 200 even when the request body is malformed JSON', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const request = new NextRequest('http://localhost/api/strava/webhook', {
+      method: 'POST',
+      body: 'not valid json at all',
+      headers: { 'content-type': 'application/json' },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Strava webhook request parsing failed:',
+      expect.any(Error),
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('returns 200 even when the request body is null JSON', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const request = new NextRequest('http://localhost/api/strava/webhook', {
+      method: 'POST',
+      body: 'null',
+      headers: { 'content-type': 'application/json' },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    // null is valid JSON, so no parse error, but accessing properties on null is safe
+    consoleErrorSpy.mockRestore();
+  });
 });

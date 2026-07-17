@@ -14,14 +14,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const payload = await request.json();
+  try {
+    const payload = await request.json();
 
-  if (payload.object_type === 'activity' && payload.aspect_type === 'create') {
-    try {
-      await syncActivity(payload.owner_id, payload.object_id);
-    } catch (error) {
-      console.error('Strava webhook activity sync failed:', error);
+    if (payload.object_type === 'activity' && payload.aspect_type === 'create') {
+      try {
+        await syncActivity(payload.owner_id, payload.object_id);
+      } catch (error) {
+        console.error('Strava webhook activity sync failed:', error);
+      }
     }
+  } catch (error) {
+    console.error('Strava webhook request parsing failed:', error);
   }
 
   return NextResponse.json({}, { status: 200 });
