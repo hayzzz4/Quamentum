@@ -17,6 +17,12 @@ export default async function HomePage() {
 
   return (
     <main>
+      {user.connectionStatus === 'disconnected' && (
+        <p role="alert">
+          Your Strava connection needs to be renewed — activities won&apos;t sync until you{' '}
+          <a href="/api/auth/login">reconnect</a>.
+        </p>
+      )}
       <h1>Welcome, {user.name}</h1>
       <form action="/api/auth/logout" method="post">
         <button type="submit">Sign out</button>
