@@ -6,6 +6,7 @@ import { db } from '@/db/client';
 import { activities } from '@/db/schema';
 import { truncateAllTables } from '@/test/db-helpers';
 import { upsertUserFromStrava, markUserDisconnected } from '@/lib/users';
+import * as usersModule from '@/lib/users';
 import { GET } from './route';
 
 function cronRequest(secret: string | null) {
@@ -81,6 +82,21 @@ describe('GET /api/cron/reconcile-activities', () => {
 
     expect(response.status).toBe(200);
     expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('returns 500 on getConnectedUsers failure with controlled error response', async () => {
+    const getConnectedUsersSpy = vi.spyOn(usersModule, 'getConnectedUsers').mockRejectedValue(new Error('Database error'));
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await GET(cronRequest('cron-secret'));
+
+    expect(response.status).toBe(500);
+    const data = await response.json();
+    expect(data).toEqual({ error: 'failed to reconcile' });
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Reconciliation failed:', expect.any(Error));
+
+    getConnectedUsersSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
 });

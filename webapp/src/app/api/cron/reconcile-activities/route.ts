@@ -11,23 +11,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const users = await getConnectedUsers();
-  const after = new Date(Date.now() - RECONCILE_WINDOW_MS);
+  try {
+    const users = await getConnectedUsers();
+    const after = new Date(Date.now() - RECONCILE_WINDOW_MS);
 
-  const results = await Promise.allSettled(
-    users.map(async (user) => {
-      const activityIds = await listRecentActivityIds(user, after);
-      for (const activityId of activityIds) {
-        await syncActivity(user.stravaAthleteId, activityId);
+    const results = await Promise.allSettled(
+      users.map(async (user) => {
+        const activityIds = await listRecentActivityIds(user, after);
+        for (const activityId of activityIds) {
+          await syncActivity(user.stravaAthleteId, activityId);
+        }
+      }),
+    );
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`Reconciliation failed for user ${users[index].id}:`, result.reason);
       }
-    }),
-  );
+    });
 
-  results.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      console.error(`Reconciliation failed for user ${users[index].id}:`, result.reason);
-    }
-  });
-
-  return NextResponse.json({ synced: users.length });
+    return NextResponse.json({ synced: users.length });
+  } catch (error) {
+    console.error('Reconciliation failed:', error);
+    return NextResponse.json({ error: 'failed to reconcile' }, { status: 500 });
+  }
 }
