@@ -31,6 +31,12 @@ describe('GET /api/cron/reconcile-activities', () => {
     expect(response.status).toBe(401);
   });
 
+  it('rejects requests when CRON_SECRET is unset, even with literal "undefined"', async () => {
+    delete process.env.CRON_SECRET;
+    const response = await GET(cronRequest('undefined'));
+    expect(response.status).toBe(401);
+  });
+
   it('syncs missing activities for every connected user, skipping disconnected ones', async () => {
     const connected = await upsertUserFromStrava(
       { id: 401, firstname: 'Connected', lastname: 'User', timezone: null },
