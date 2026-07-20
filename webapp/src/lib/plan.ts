@@ -1,4 +1,6 @@
-import { targetMetricEnum, workoutSportEnum, workoutTypeEnum, type PlannedWorkout } from '@/db/schema';
+import { and, eq, gte, lt } from 'drizzle-orm';
+import { db } from '@/db/client';
+import { targetMetricEnum, workoutSportEnum, workoutTypeEnum, type PlannedWorkout, plannedWorkouts } from '@/db/schema';
 
 const DATE_PARAM_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -102,4 +104,26 @@ export function parseWorkoutForm(values: WorkoutFormValues): PlannedWorkoutInput
     targetValue,
     notes: values.notes.trim() || null,
   };
+}
+
+export async function getWeekPlanned(userId: string, weekStart: Date): Promise<PlannedWorkout[]> {
+  const weekEnd = new Date(weekStart);
+  weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
+  return db
+    .select()
+    .from(plannedWorkouts)
+    .where(
+      and(
+        eq(plannedWorkouts.userId, userId),
+        gte(plannedWorkouts.date, weekStart),
+        lt(plannedWorkouts.date, weekEnd),
+      ),
+    );
+}
+
+export async function getDayPlanned(userId: string, date: Date): Promise<PlannedWorkout[]> {
+  return db
+    .select()
+    .from(plannedWorkouts)
+    .where(and(eq(plannedWorkouts.userId, userId), eq(plannedWorkouts.date, date)));
 }

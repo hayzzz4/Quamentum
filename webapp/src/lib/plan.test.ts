@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { formatDateParam, isEditableDate, mondayOf, parseDateParam, parseWorkoutForm, readWorkoutFormValues, targetFieldsValid, type WorkoutFormValues } from './plan';
 
 describe('mondayOf', () => {
@@ -155,5 +155,64 @@ describe('readWorkoutFormValues', () => {
       targetValue: '',
       notes: '',
     });
+  });
+});
+
+import { eq } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
+import { db } from '@/db/client';
+import { plannedWorkouts } from '@/db/schema';
+import { truncateAllTables } from '@/test/db-helpers';
+import { upsertUserFromStrava } from './users';
+import { getDayPlanned, getWeekPlanned } from './plan';
+
+async function createTestUser(stravaAthleteId: number) {
+  return upsertUserFromStrava(
+    { id: stravaAthleteId, firstname: 'Test', lastname: 'Athlete', timezone: null },
+    { accessToken: 'access', refreshToken: 'refresh', expiresAt: new Date() },
+  );
+}
+
+async function insertWorkout(userId: string, date: Date, sport: (typeof plannedWorkouts.$inferInsert)['sport'] = 'run') {
+  const [row] = await db
+    .insert(plannedWorkouts)
+    .values({ userId, date, sport, workoutType: 'easy', status: 'planned', source: 'user' })
+    .returning();
+  return row;
+}
+
+describe('getWeekPlanned / getDayPlanned', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('returns only workouts within the requested 7-day window', async () => {
+    const user = await createTestUser(501);
+    await insertWorkout(user.id, new Date('2026-07-20'));
+    await insertWorkout(user.id, new Date('2026-07-26'));
+    await insertWorkout(user.id, new Date('2026-07-27')); // outside the window
+
+    const week = await getWeekPlanned(user.id, new Date('2026-07-20'));
+    expect(week.map((w) => w.date.toISOString().slice(0, 10)).sort()).toEqual(['2026-07-20', '2026-07-26']);
+  });
+
+  it('scopes results to the requesting user', async () => {
+    const user = await createTestUser(502);
+    const other = await createTestUser(503);
+    await insertWorkout(user.id, new Date('2026-07-20'));
+    await insertWorkout(other.id, new Date('2026-07-20'));
+
+    const week = await getWeekPlanned(user.id, new Date('2026-07-20'));
+    expect(week).toHaveLength(1);
+  });
+
+  it('returns every workout for a single day, including multiple same-day entries', async () => {
+    const user = await createTestUser(504);
+    await insertWorkout(user.id, new Date('2026-07-20'), 'swim');
+    await insertWorkout(user.id, new Date('2026-07-20'), 'run');
+
+    const day = await getDayPlanned(user.id, new Date('2026-07-20'));
+    expect(day.map((w) => w.sport).sort()).toEqual(['run', 'swim']);
   });
 });
