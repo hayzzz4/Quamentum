@@ -1,3 +1,5 @@
+import { targetMetricEnum, workoutSportEnum, workoutTypeEnum, type PlannedWorkout } from '@/db/schema';
+
 const DATE_PARAM_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function parseDateParam(raw: string): Date | null {
@@ -26,4 +28,78 @@ export function mondayOf(date: Date): Date {
 
 export function isEditableDate(date: Date, now: Date = new Date()): boolean {
   return date.getTime() >= startOfUTCDay(now).getTime();
+}
+
+const VALID_SPORTS = new Set<string>(workoutSportEnum.enumValues);
+const VALID_WORKOUT_TYPES = new Set<string>(workoutTypeEnum.enumValues);
+const VALID_TARGET_METRICS = new Set<string>(targetMetricEnum.enumValues);
+
+export interface WorkoutFormValues {
+  sport: string;
+  workoutType: string;
+  targetDurationMin: string;
+  targetDistance: string;
+  targetMetric: string;
+  targetValue: string;
+  notes: string;
+}
+
+export interface PlannedWorkoutInput {
+  sport: PlannedWorkout['sport'];
+  workoutType: PlannedWorkout['workoutType'];
+  targetDurationMin: number | null;
+  targetDistance: string | null;
+  targetMetric: PlannedWorkout['targetMetric'];
+  targetValue: string | null;
+  notes: string | null;
+}
+
+export function targetFieldsValid(targetMetric: string | null, targetValue: string | null): boolean {
+  return (targetMetric !== null) === (targetValue !== null);
+}
+
+export function readWorkoutFormValues(formData: FormData): WorkoutFormValues {
+  return {
+    sport: String(formData.get('sport') ?? ''),
+    workoutType: String(formData.get('workoutType') ?? ''),
+    targetDurationMin: String(formData.get('targetDurationMin') ?? ''),
+    targetDistance: String(formData.get('targetDistance') ?? ''),
+    targetMetric: String(formData.get('targetMetric') ?? ''),
+    targetValue: String(formData.get('targetValue') ?? ''),
+    notes: String(formData.get('notes') ?? ''),
+  };
+}
+
+export function parseWorkoutForm(values: WorkoutFormValues): PlannedWorkoutInput | null {
+  if (!VALID_SPORTS.has(values.sport)) return null;
+  if (!VALID_WORKOUT_TYPES.has(values.workoutType)) return null;
+
+  const targetMetric = values.targetMetric.trim() || null;
+  const targetValue = values.targetValue.trim() || null;
+  if (targetMetric !== null && !VALID_TARGET_METRICS.has(targetMetric)) return null;
+  if (!targetFieldsValid(targetMetric, targetValue)) return null;
+
+  let targetDurationMin: number | null = null;
+  if (values.targetDurationMin.trim()) {
+    const parsed = Number(values.targetDurationMin);
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    targetDurationMin = parsed;
+  }
+
+  let targetDistance: string | null = null;
+  if (values.targetDistance.trim()) {
+    const parsed = Number(values.targetDistance);
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    targetDistance = parsed.toFixed(2);
+  }
+
+  return {
+    sport: values.sport as PlannedWorkout['sport'],
+    workoutType: values.workoutType as PlannedWorkout['workoutType'],
+    targetDurationMin,
+    targetDistance,
+    targetMetric: targetMetric as PlannedWorkout['targetMetric'],
+    targetValue,
+    notes: values.notes.trim() || null,
+  };
 }
