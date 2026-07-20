@@ -216,3 +216,128 @@ describe('getWeekPlanned / getDayPlanned', () => {
     expect(day.map((w) => w.sport).sort()).toEqual(['run', 'swim']);
   });
 });
+
+import {
+  createPlannedWorkout,
+  deletePlannedWorkout,
+  getOwnedPlannedWorkout,
+  updatePlannedWorkout,
+  type PlannedWorkoutInput,
+} from './plan';
+
+function baseFields(overrides: Partial<PlannedWorkoutInput> = {}): PlannedWorkoutInput {
+  return {
+    sport: 'run',
+    workoutType: 'easy',
+    targetDurationMin: null,
+    targetDistance: null,
+    targetMetric: null,
+    targetValue: null,
+    notes: null,
+    ...overrides,
+  };
+}
+
+describe('createPlannedWorkout', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('creates a workout with source=user and status=planned', async () => {
+    const user = await createTestUser(601);
+    const created = await createPlannedWorkout(user.id, new Date('2026-07-20'), baseFields());
+    expect(created.source).toBe('user');
+    expect(created.status).toBe('planned');
+    expect(created.sport).toBe('run');
+  });
+});
+
+describe('getOwnedPlannedWorkout', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('returns the workout for its owner', async () => {
+    const user = await createTestUser(602);
+    const created = await createPlannedWorkout(user.id, new Date('2026-07-20'), baseFields());
+    expect((await getOwnedPlannedWorkout(user.id, created.id))?.id).toBe(created.id);
+  });
+
+  it('returns null when the workout belongs to another user', async () => {
+    const owner = await createTestUser(603);
+    const other = await createTestUser(604);
+    const created = await createPlannedWorkout(owner.id, new Date('2026-07-20'), baseFields());
+    expect(await getOwnedPlannedWorkout(other.id, created.id)).toBeNull();
+  });
+
+  it('returns null for a nonexistent workout id', async () => {
+    const user = await createTestUser(605);
+    expect(await getOwnedPlannedWorkout(user.id, '00000000-0000-0000-0000-000000000000')).toBeNull();
+  });
+});
+
+describe('updatePlannedWorkout', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('updates the fields of a workout the user owns', async () => {
+    const user = await createTestUser(606);
+    const created = await createPlannedWorkout(user.id, new Date('2026-07-20'), baseFields());
+    const updated = await updatePlannedWorkout(
+      user.id,
+      created.id,
+      baseFields({ workoutType: 'tempo', notes: 'Push the middle mile' }),
+    );
+    expect(updated?.workoutType).toBe('tempo');
+    expect(updated?.notes).toBe('Push the middle mile');
+  });
+
+  it('returns null and does not update a workout owned by another user', async () => {
+    const owner = await createTestUser(607);
+    const other = await createTestUser(608);
+    const created = await createPlannedWorkout(owner.id, new Date('2026-07-20'), baseFields());
+
+    const result = await updatePlannedWorkout(other.id, created.id, baseFields({ workoutType: 'tempo' }));
+    expect(result).toBeNull();
+
+    const [stillOriginal] = await db.select().from(plannedWorkouts).where(eq(plannedWorkouts.id, created.id));
+    expect(stillOriginal.workoutType).toBe('easy');
+  });
+});
+
+describe('deletePlannedWorkout', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('deletes a planned-status workout the user owns', async () => {
+    const user = await createTestUser(609);
+    const created = await createPlannedWorkout(user.id, new Date('2026-07-20'), baseFields());
+    expect(await deletePlannedWorkout(user.id, created.id)).toBe('deleted');
+    expect(await getOwnedPlannedWorkout(user.id, created.id)).toBeNull();
+  });
+
+  it('returns not_found for another user\'s workout and leaves it untouched', async () => {
+    const owner = await createTestUser(610);
+    const other = await createTestUser(611);
+    const created = await createPlannedWorkout(owner.id, new Date('2026-07-20'), baseFields());
+
+    expect(await deletePlannedWorkout(other.id, created.id)).toBe('not_found');
+    expect(await getOwnedPlannedWorkout(owner.id, created.id)).not.toBeNull();
+  });
+
+  it('returns not_deletable for a completed workout and leaves it untouched', async () => {
+    const user = await createTestUser(612);
+    const created = await createPlannedWorkout(user.id, new Date('2026-07-20'), baseFields());
+    await db.update(plannedWorkouts).set({ status: 'completed' }).where(eq(plannedWorkouts.id, created.id));
+
+    expect(await deletePlannedWorkout(user.id, created.id)).toBe('not_deletable');
+    const [stillThere] = await db.select().from(plannedWorkouts).where(eq(plannedWorkouts.id, created.id));
+    expect(stillThere.status).toBe('completed');
+  });
+});

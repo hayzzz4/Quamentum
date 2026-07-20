@@ -127,3 +127,47 @@ export async function getDayPlanned(userId: string, date: Date): Promise<Planned
     .from(plannedWorkouts)
     .where(and(eq(plannedWorkouts.userId, userId), eq(plannedWorkouts.date, date)));
 }
+
+export async function createPlannedWorkout(
+  userId: string,
+  date: Date,
+  fields: PlannedWorkoutInput,
+): Promise<PlannedWorkout> {
+  const [inserted] = await db
+    .insert(plannedWorkouts)
+    .values({ userId, date, source: 'user', status: 'planned', ...fields })
+    .returning();
+  return inserted;
+}
+
+export async function getOwnedPlannedWorkout(userId: string, workoutId: string): Promise<PlannedWorkout | null> {
+  const [workout] = await db.select().from(plannedWorkouts).where(eq(plannedWorkouts.id, workoutId));
+  if (!workout || workout.userId !== userId) return null;
+  return workout;
+}
+
+export async function updatePlannedWorkout(
+  userId: string,
+  workoutId: string,
+  fields: PlannedWorkoutInput,
+): Promise<PlannedWorkout | null> {
+  const [updated] = await db
+    .update(plannedWorkouts)
+    .set({ ...fields, updatedAt: new Date() })
+    .where(and(eq(plannedWorkouts.id, workoutId), eq(plannedWorkouts.userId, userId)))
+    .returning();
+  return updated ?? null;
+}
+
+export type DeletePlannedWorkoutResult = 'deleted' | 'not_found' | 'not_deletable';
+
+export async function deletePlannedWorkout(userId: string, workoutId: string): Promise<DeletePlannedWorkoutResult> {
+  const [existing] = await db
+    .select()
+    .from(plannedWorkouts)
+    .where(and(eq(plannedWorkouts.id, workoutId), eq(plannedWorkouts.userId, userId)));
+  if (!existing) return 'not_found';
+  if (existing.status === 'completed') return 'not_deletable';
+  await db.delete(plannedWorkouts).where(eq(plannedWorkouts.id, workoutId));
+  return 'deleted';
+}
