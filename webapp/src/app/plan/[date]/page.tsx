@@ -20,6 +20,7 @@ export default async function PlanDayPage({ params }: { params: Promise<{ date: 
   return (
     <main>
       <p>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- plain anchor, no client JS by convention */}
         <a href="/">‹ Back to week</a>
       </p>
       <h1>{dateParam}</h1>
