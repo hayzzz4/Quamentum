@@ -23,6 +23,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!isEditableDate(existing.date)) {
     return NextResponse.json({ error: 'past date' }, { status: 400 });
   }
+  if (existing.status === 'completed') {
+    return NextResponse.json({ error: 'not editable' }, { status: 400 });
+  }
 
   const dateParam = formatDateParam(existing.date);
   const formData = await request.formData();

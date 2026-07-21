@@ -17,7 +17,7 @@ export default async function EditPlannedWorkoutPage({
 
   const { workoutId } = await params;
   const workout = await getOwnedPlannedWorkout(userId, workoutId);
-  if (!workout || !isEditableDate(workout.date)) {
+  if (!workout || !isEditableDate(workout.date) || workout.status === 'completed') {
     notFound();
   }
 

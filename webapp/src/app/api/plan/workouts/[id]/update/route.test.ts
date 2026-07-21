@@ -107,6 +107,19 @@ describe('POST /api/plan/workouts/[id]/update', () => {
     expect(response.status).toBe(400);
   });
 
+  it('rejects editing a completed workout with a 400', async () => {
+    const user = await createTestUser(807);
+    vi.spyOn(sessionModule, 'getCurrentUserId').mockResolvedValue(user.id);
+    const workout = await createPlannedWorkout(user.id, FUTURE_DATE, baseFields());
+    await db.update(plannedWorkouts).set({ status: 'completed' }).where(eq(plannedWorkouts.id, workout.id));
+
+    const response = await POST(formRequest(workout.id, formValues({ workoutType: 'tempo' })), routeParams(workout.id));
+
+    expect(response.status).toBe(400);
+    const [stored] = await db.select().from(plannedWorkouts).where(eq(plannedWorkouts.id, workout.id));
+    expect(stored.workoutType).not.toBe('tempo');
+  });
+
   it('redirects back to the edit form with an error when fields are invalid', async () => {
     const user = await createTestUser(806);
     vi.spyOn(sessionModule, 'getCurrentUserId').mockResolvedValue(user.id);

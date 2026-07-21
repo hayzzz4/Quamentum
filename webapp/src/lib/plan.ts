@@ -84,7 +84,7 @@ export function parseWorkoutForm(values: WorkoutFormValues): PlannedWorkoutInput
   let targetDurationMin: number | null = null;
   if (values.targetDurationMin.trim()) {
     const parsed = Number(values.targetDurationMin);
-    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    if (!Number.isInteger(parsed) || parsed <= 0) return null;
     targetDurationMin = parsed;
   }
 
@@ -118,14 +118,16 @@ export async function getWeekPlanned(userId: string, weekStart: Date): Promise<P
         gte(plannedWorkouts.date, weekStart),
         lt(plannedWorkouts.date, weekEnd),
       ),
-    );
+    )
+    .orderBy(plannedWorkouts.createdAt);
 }
 
 export async function getDayPlanned(userId: string, date: Date): Promise<PlannedWorkout[]> {
   return db
     .select()
     .from(plannedWorkouts)
-    .where(and(eq(plannedWorkouts.userId, userId), eq(plannedWorkouts.date, date)));
+    .where(and(eq(plannedWorkouts.userId, userId), eq(plannedWorkouts.date, date)))
+    .orderBy(plannedWorkouts.createdAt);
 }
 
 export async function createPlannedWorkout(
