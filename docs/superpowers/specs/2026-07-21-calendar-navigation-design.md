@@ -99,19 +99,23 @@ implemented as a same-request date translation between the two params:
 Standard 7-column grid (`DAY_LABELS` reused from Week view), one row per week
 in `monthGridRange`. Each cell:
 
-- **In-month days**: date label linking to `/plan/<date>` (consistent with
-  Week view's day cells), plus a compact status summary. The master spec
-  collapses the full `planned_workouts.status` set to three display states
-  for grid space — this plan implements that full mapping now even though
-  `pending_review`/`ai_suggested` rows can't be produced yet (Insight
-  generation isn't built): `completed` → completed, `planned`/`accepted` →
-  planned, `pending_review` → suggested, `rejected`/`superseded` → whatever
-  status the row that stands in their place has (i.e. just don't render the
-  superseded/rejected row itself). In practice, until Insight generation
-  ships, only `planned` and `completed` will ever appear.
-- **Race marker**: if any `race_events` row falls on that date, render its
-  name as a plain, non-interactive label in the cell (no link — see
-  Non-Goals).
+- **In-month days**: date label linking to `/?week=<Monday of that day's
+  week>` (see Data Flow above — Month cells jump into Week view, unlike Week
+  view's own day cells which link to `/plan/<date>`), plus a compact status
+  summary. The master spec collapses the full `planned_workouts.status` set
+  to three display states for grid space — this plan implements that full
+  mapping now even though `pending_review`/`ai_suggested` rows can't be
+  produced yet (Insight generation isn't built): `completed` → completed,
+  `planned`/`accepted` → planned, `pending_review` → suggested,
+  `rejected`/`superseded` → whatever status the row that stands in their
+  place has (i.e. just don't render the superseded/rejected row itself). In
+  practice, until Insight generation ships, only `planned` and `completed`
+  will ever appear.
+- **Race marker**: every `race_events` row that falls on that date renders
+  as its own plain, non-interactive label in the cell (no link — see
+  Non-Goals). Most days have zero; a day with two overlapping races (e.g. a
+  B/C race inside an A-race's timeline) shows two stacked labels rather than
+  picking one.
 - **Adjacent-month days**: date label only, dimmed via inline style (muted
   color, consistent with the app's existing no-CSS-framework/inline-style
   convention), no link, no workout/race data rendered even though it was
