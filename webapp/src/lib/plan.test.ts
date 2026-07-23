@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { formatDateParam, isEditableDate, mondayOf, parseDateParam, parseWorkoutForm, readWorkoutFormValues, targetFieldsValid, type WorkoutFormValues } from './plan';
+import { firstOfMonth, formatDateParam, isEditableDate, mondayOf, monthGridRange, parseDateParam, parseWorkoutForm, readWorkoutFormValues, targetFieldsValid, type WorkoutFormValues } from './plan';
 
 describe('mondayOf', () => {
   it('returns the same date when given a Monday', () => {
@@ -16,6 +16,44 @@ describe('mondayOf', () => {
 
   it('rolls back across a year boundary', () => {
     expect(formatDateParam(mondayOf(new Date('2026-01-01T00:00:00Z')))).toBe('2025-12-29');
+  });
+});
+
+describe('firstOfMonth', () => {
+  it('floors a mid-month date to the 1st', () => {
+    expect(formatDateParam(firstOfMonth(new Date('2026-07-15T00:00:00Z')))).toBe('2026-07-01');
+  });
+
+  it('returns the same date when already the 1st', () => {
+    expect(formatDateParam(firstOfMonth(new Date('2026-07-01T00:00:00Z')))).toBe('2026-07-01');
+  });
+});
+
+describe('monthGridRange', () => {
+  it('spans a month that starts on Monday with no leading days (5 rows)', () => {
+    const { gridStart, gridEnd } = monthGridRange(firstOfMonth(new Date('2026-06-15T00:00:00Z')));
+    expect(formatDateParam(gridStart)).toBe('2026-06-01');
+    expect(formatDateParam(gridEnd)).toBe('2026-07-06');
+    expect((gridEnd.getTime() - gridStart.getTime()) / (7 * 86400000)).toBe(5);
+  });
+
+  it('spans a month that starts on Sunday with max leading days (6 rows)', () => {
+    const { gridStart, gridEnd } = monthGridRange(firstOfMonth(new Date('2026-11-15T00:00:00Z')));
+    expect(formatDateParam(gridStart)).toBe('2026-10-26');
+    expect(formatDateParam(gridEnd)).toBe('2026-12-07');
+    expect((gridEnd.getTime() - gridStart.getTime()) / (7 * 86400000)).toBe(6);
+  });
+
+  it('handles a leap-year February', () => {
+    const { gridStart, gridEnd } = monthGridRange(firstOfMonth(new Date('2028-02-15T00:00:00Z')));
+    expect(formatDateParam(gridStart)).toBe('2028-01-31');
+    expect(formatDateParam(gridEnd)).toBe('2028-03-06');
+  });
+
+  it('spans a December-to-January year boundary', () => {
+    const { gridStart, gridEnd } = monthGridRange(firstOfMonth(new Date('2026-12-15T00:00:00Z')));
+    expect(formatDateParam(gridStart)).toBe('2026-11-30');
+    expect(formatDateParam(gridEnd)).toBe('2027-01-04');
   });
 });
 

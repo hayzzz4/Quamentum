@@ -28,6 +28,21 @@ export function mondayOf(date: Date): Date {
   return start;
 }
 
+export function firstOfMonth(date: Date): Date {
+  const start = startOfUTCDay(date);
+  return new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+}
+
+export function monthGridRange(monthStart: Date): { gridStart: Date; gridEnd: Date } {
+  const lastOfMonth = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0));
+  const gridStart = mondayOf(monthStart);
+  // Exclusive end, matching getWeekPlanned's [start, end) convention: the
+  // Monday after the Sunday that closes out the last visible week.
+  const gridEnd = mondayOf(lastOfMonth);
+  gridEnd.setUTCDate(gridEnd.getUTCDate() + 7);
+  return { gridStart, gridEnd };
+}
+
 export function isEditableDate(date: Date, now: Date = new Date()): boolean {
   return date.getTime() >= startOfUTCDay(now).getTime();
 }
