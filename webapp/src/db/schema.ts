@@ -151,3 +151,4 @@ export type Activity = typeof activities.$inferSelect;
 export type NewActivity = typeof activities.$inferInsert;
 export type PlannedWorkout = typeof plannedWorkouts.$inferSelect;
 export type ActivitySport = (typeof activitySportEnum.enumValues)[number];
+export type RaceEvent = typeof raceEvents.$inferSelect;

@@ -203,7 +203,7 @@ describe('readWorkoutFormValues', () => {
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { db } from '@/db/client';
-import { plannedWorkouts } from '@/db/schema';
+import { plannedWorkouts, raceEvents } from '@/db/schema';
 import { truncateAllTables } from '@/test/db-helpers';
 import { upsertUserFromStrava } from './users';
 import { getDayPlanned, getPlannedInRange, getWeekPlanned } from './plan';
@@ -219,6 +219,14 @@ async function insertWorkout(userId: string, date: Date, sport: (typeof plannedW
   const [row] = await db
     .insert(plannedWorkouts)
     .values({ userId, date, sport, workoutType: 'easy', status: 'planned', source: 'user' })
+    .returning();
+  return row;
+}
+
+async function insertRace(userId: string, date: Date, name = 'Test Race') {
+  const [row] = await db
+    .insert(raceEvents)
+    .values({ userId, name, date, priority: 'A' })
     .returning();
   return row;
 }
@@ -283,6 +291,34 @@ describe('getPlannedInRange', () => {
 
     const rows = await getPlannedInRange(user.id, new Date('2026-06-25'), new Date('2026-07-06'));
     expect(rows.map((w) => w.date.toISOString().slice(0, 10)).sort()).toEqual(['2026-06-29', '2026-07-02']);
+  });
+});
+
+import { getRaceEventsInRange } from './plan';
+
+describe('getRaceEventsInRange', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('returns races within the range and excludes ones outside it', async () => {
+    const user = await createTestUser(702);
+    await insertRace(user.id, new Date('2026-07-10'), 'In range');
+    await insertRace(user.id, new Date('2026-08-01'), 'Out of range');
+
+    const races = await getRaceEventsInRange(user.id, new Date('2026-07-01'), new Date('2026-07-31'));
+    expect(races.map((r) => r.name)).toEqual(['In range']);
+  });
+
+  it('scopes results to the requesting user', async () => {
+    const user = await createTestUser(703);
+    const other = await createTestUser(704);
+    await insertRace(user.id, new Date('2026-07-10'));
+    await insertRace(other.id, new Date('2026-07-10'));
+
+    const races = await getRaceEventsInRange(user.id, new Date('2026-07-01'), new Date('2026-07-31'));
+    expect(races).toHaveLength(1);
   });
 });
 

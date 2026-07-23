@@ -1,6 +1,6 @@
 import { and, eq, gte, lt } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { targetMetricEnum, workoutSportEnum, workoutTypeEnum, type PlannedWorkout, plannedWorkouts } from '@/db/schema';
+import { targetMetricEnum, workoutSportEnum, workoutTypeEnum, type PlannedWorkout, plannedWorkouts, type RaceEvent, raceEvents } from '@/db/schema';
 
 const DATE_PARAM_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -139,6 +139,14 @@ export async function getWeekPlanned(userId: string, weekStart: Date): Promise<P
   const weekEnd = new Date(weekStart);
   weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
   return getPlannedInRange(userId, weekStart, weekEnd);
+}
+
+export async function getRaceEventsInRange(userId: string, start: Date, end: Date): Promise<RaceEvent[]> {
+  return db
+    .select()
+    .from(raceEvents)
+    .where(and(eq(raceEvents.userId, userId), gte(raceEvents.date, start), lt(raceEvents.date, end)))
+    .orderBy(raceEvents.date);
 }
 
 export async function getDayPlanned(userId: string, date: Date): Promise<PlannedWorkout[]> {
