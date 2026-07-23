@@ -63,7 +63,6 @@ export default async function HomePage({
         <a href={`/?week=${formatDateParam(currentWeekStart)}`}>Today</a>{' '}
         <a href={`/?week=${formatDateParam(nextWeek)}`}>Next ›</a>{' '}
         <a href={monthViewHref}>Month view</a>{' '}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- plain anchor, no client JS by convention */}
         <a href="/checkin">Check in</a>
       </nav>
       <table>
