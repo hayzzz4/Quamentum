@@ -206,7 +206,7 @@ import { db } from '@/db/client';
 import { plannedWorkouts } from '@/db/schema';
 import { truncateAllTables } from '@/test/db-helpers';
 import { upsertUserFromStrava } from './users';
-import { getDayPlanned, getWeekPlanned } from './plan';
+import { getDayPlanned, getPlannedInRange, getWeekPlanned } from './plan';
 
 async function createTestUser(stravaAthleteId: number) {
   return upsertUserFromStrava(
@@ -266,6 +266,23 @@ describe('getWeekPlanned / getDayPlanned', () => {
     const day = await getDayPlanned(user.id, new Date('2026-07-20'));
     expect(day[0].id).toBe(a.id);
     expect(day[1].id).toBe(b.id);
+  });
+});
+
+describe('getPlannedInRange', () => {
+  beforeEach(async () => {
+    process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+    await truncateAllTables();
+  });
+
+  it('returns workouts across a range spanning two months', async () => {
+    const user = await createTestUser(701);
+    await insertWorkout(user.id, new Date('2026-06-29'));
+    await insertWorkout(user.id, new Date('2026-07-02'));
+    await insertWorkout(user.id, new Date('2026-08-01')); // outside the range
+
+    const rows = await getPlannedInRange(user.id, new Date('2026-06-25'), new Date('2026-07-06'));
+    expect(rows.map((w) => w.date.toISOString().slice(0, 10)).sort()).toEqual(['2026-06-29', '2026-07-02']);
   });
 });
 

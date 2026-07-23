@@ -121,20 +121,24 @@ export function parseWorkoutForm(values: WorkoutFormValues): PlannedWorkoutInput
   };
 }
 
-export async function getWeekPlanned(userId: string, weekStart: Date): Promise<PlannedWorkout[]> {
-  const weekEnd = new Date(weekStart);
-  weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
+export async function getPlannedInRange(userId: string, start: Date, end: Date): Promise<PlannedWorkout[]> {
   return db
     .select()
     .from(plannedWorkouts)
     .where(
       and(
         eq(plannedWorkouts.userId, userId),
-        gte(plannedWorkouts.date, weekStart),
-        lt(plannedWorkouts.date, weekEnd),
+        gte(plannedWorkouts.date, start),
+        lt(plannedWorkouts.date, end),
       ),
     )
     .orderBy(plannedWorkouts.createdAt);
+}
+
+export async function getWeekPlanned(userId: string, weekStart: Date): Promise<PlannedWorkout[]> {
+  const weekEnd = new Date(weekStart);
+  weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
+  return getPlannedInRange(userId, weekStart, weekEnd);
 }
 
 export async function getDayPlanned(userId: string, date: Date): Promise<PlannedWorkout[]> {
