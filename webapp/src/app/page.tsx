@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
 import { getCurrentUserId } from '@/lib/session';
-import { formatDateParam, getWeekPlanned, isEditableDate, mondayOf, parseDateParam } from '@/lib/plan';
+import { firstOfMonth, formatDateParam, getWeekPlanned, isEditableDate, mondayOf, parseDateParam } from '@/lib/plan';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -47,6 +47,7 @@ export default async function HomePage({
   const nextWeek = new Date(weekStart);
   nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
   const currentWeekStart = mondayOf(new Date());
+  const monthViewHref = `/month?month=${formatDateParam(firstOfMonth(weekStart))}`;
 
   return (
     <main>
@@ -60,7 +61,8 @@ export default async function HomePage({
       <nav>
         <a href={`/?week=${formatDateParam(previousWeek)}`}>‹ Previous</a>{' '}
         <a href={`/?week=${formatDateParam(currentWeekStart)}`}>Today</a>{' '}
-        <a href={`/?week=${formatDateParam(nextWeek)}`}>Next ›</a>
+        <a href={`/?week=${formatDateParam(nextWeek)}`}>Next ›</a>{' '}
+        <a href={monthViewHref}>Month view</a>
       </nav>
       <table>
         <thead>
