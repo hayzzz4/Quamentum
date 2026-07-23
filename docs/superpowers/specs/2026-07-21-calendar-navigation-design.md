@@ -149,6 +149,8 @@ in `monthGridRange`. Each cell:
 - **Manual/exploratory**: navigate several months forward and back via
   `‹`/`›`/"Today"; toggle Week⇄Month from a specific week and confirm the
   landed-on month is correct, then toggle back and confirm it returns to
-  that week; click an in-month day and confirm it opens the right week;
-  confirm a race day shows its marker and clicking it does nothing;
-  confirm adjacent-month filler days are dimmed and unclickable.
+  the week containing that month's 1st (per Data Flow above, this is not
+  necessarily the originating week); click an in-month day and confirm it
+  opens the right week; confirm a race day shows its marker and clicking
+  it does nothing; confirm adjacent-month filler days are dimmed and
+  unclickable.

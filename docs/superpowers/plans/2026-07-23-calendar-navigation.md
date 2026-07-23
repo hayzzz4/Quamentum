@@ -512,7 +512,7 @@ Expected: both succeed with no errors.
 
 Run `npm run dev`, sign in, and check each item from the spec's Manual/exploratory section:
 - Navigate several months forward and back via `‹`/`›`/"Today".
-- From `/`, click "Month view" on a specific week; confirm it lands on the month containing that week. From `/month`, click "Week view"; confirm it returns to that same week.
+- From `/`, click "Month view" on a specific week; confirm it lands on the month containing that week. From `/month`, click "Week view"; confirm it returns to the week containing that month's 1st (not necessarily the originating week — see the spec's Data Flow section).
 - Click an in-month day cell; confirm it opens `/` on the correct week.
 - Confirm a race day shows its marker (add a test row directly in the DB if none exist yet) and that clicking it does nothing.
 - Confirm adjacent-month filler days are dimmed (`#999`) and unclickable (no `<a>`).
