@@ -19,6 +19,7 @@ function summarizeStatus(dayWorkouts: PlannedWorkout[]): string[] {
     if (workout.status === 'completed') labels.push('completed');
     else if (workout.status === 'planned' || workout.status === 'accepted') labels.push('planned');
     else if (workout.status === 'pending_review') labels.push('suggested');
+    else if (workout.status === 'skipped') labels.push('skipped');
     // rejected/superseded rows are not rendered — the workout that replaced them is.
   }
   return labels;
