@@ -16,7 +16,7 @@
 - **UTC date handling.** "Today" is always UTC-midnight, matching the existing `startOfUTCDay`/`mondayOf` convention in `lib/plan.ts` — never local-timezone `Date` methods.
 - **Real Postgres in tests**, via the existing `truncateAllTables()` / `beforeEach` pattern (`fileParallelism: false`, port 5433). No mocking the DB.
 - **`TOKEN_ENCRYPTION_KEY`** must be set (`process.env.TOKEN_ENCRYPTION_KEY = randomBytes(32).toString('hex')`) in any test `beforeEach` that creates a user, matching every existing test block in this codebase.
-- **`@next/next/no-html-link-for-pages` eslint rule**: any `<a href="/some-literal-path">` (a static string literal to an internal route) needs `{/* eslint-disable-next-line @next/next/no-html-link-for-pages -- plain anchor, no client JS by convention */}` on the line above it. Template-literal hrefs (e.g. `` href={`/?week=${x}`} ``) do not trigger this rule and need no comment.
+- **`@next/next/no-html-link-for-pages` eslint rule**: in this codebase's App Router setup, this rule only fires for a literal `<a href="/">` (the root path) — nested literal paths like `href="/checkin"` do not trigger it (confirmed via `npm run lint`; a disable comment added there produces an "unused directive" warning instead). Only add `{/* eslint-disable-next-line @next/next/no-html-link-for-pages -- plain anchor, no client JS by convention */}` above a literal root `href="/"`. Template-literal hrefs (e.g. `` href={`/?week=${x}`} ``) never trigger this rule regardless of target.
 - Run `npm run lint` and `npm test` (from `webapp/`) after every task; run `npm run build` after the final task.
 
 ---
