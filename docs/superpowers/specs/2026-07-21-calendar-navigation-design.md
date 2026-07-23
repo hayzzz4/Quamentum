@@ -102,15 +102,17 @@ in `monthGridRange`. Each cell:
 - **In-month days**: date label linking to `/?week=<Monday of that day's
   week>` (see Data Flow above — Month cells jump into Week view, unlike Week
   view's own day cells which link to `/plan/<date>`), plus a compact status
-  summary. The master spec collapses the full `planned_workouts.status` set
-  to three display states for grid space — this plan implements that full
-  mapping now even though `pending_review`/`ai_suggested` rows can't be
-  produced yet (Insight generation isn't built): `completed` → completed,
-  `planned`/`accepted` → planned, `pending_review` → suggested,
-  `rejected`/`superseded` → whatever status the row that stands in their
-  place has (i.e. just don't render the superseded/rejected row itself). In
-  practice, until Insight generation ships, only `planned` and `completed`
-  will ever appear.
+  summary. The master spec's three-state collapse (completed/planned/
+  suggested) omits `skipped` from its enumeration; this plan renders it as
+  its own fourth label rather than dropping it, since a silently-blank cell
+  would be indistinguishable from a rest day. Full mapping: `completed` →
+  completed, `planned`/`accepted` → planned, `pending_review` → suggested,
+  `skipped` → skipped, `rejected`/`superseded` → whatever status the row
+  that stands in their place has (i.e. just don't render the
+  superseded/rejected row itself). In practice, nothing in the app sets
+  `status='skipped'` yet either, so until some future feature does, only
+  `planned` and `completed` will ever appear — the `skipped` branch exists
+  so that feature won't need to touch this file when it lands.
 - **Race marker**: every `race_events` row that falls on that date renders
   as its own plain, non-interactive label in the cell (no link — see
   Non-Goals). Most days have zero; a day with two overlapping races (e.g. a
