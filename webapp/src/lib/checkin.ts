@@ -1,3 +1,7 @@
+import { and, eq } from 'drizzle-orm';
+import { db } from '@/db/client';
+import { checkins, type Checkin } from '@/db/schema';
+
 export interface CheckinFormValues {
   sleepHours: string;
   soreness: string;
@@ -37,4 +41,28 @@ export function parseCheckinForm(values: CheckinFormValues): CheckinInput | null
     energy,
     note: values.note.trim() || null,
   };
+}
+
+export function todayUTC(now: Date = new Date()): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+export async function upsertCheckin(userId: string, date: Date, fields: CheckinInput): Promise<Checkin> {
+  const [row] = await db
+    .insert(checkins)
+    .values({ userId, date, ...fields })
+    .onConflictDoUpdate({
+      target: [checkins.userId, checkins.date],
+      set: { ...fields },
+    })
+    .returning();
+  return row;
+}
+
+export async function getTodayCheckin(userId: string, date: Date): Promise<Checkin | null> {
+  const [row] = await db
+    .select()
+    .from(checkins)
+    .where(and(eq(checkins.userId, userId), eq(checkins.date, date)));
+  return row ?? null;
 }
